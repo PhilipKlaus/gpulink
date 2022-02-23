@@ -7,7 +7,8 @@ from pynvml.smi import nvidia_smi
 import matplotlib.pyplot as plt
 
 measurements = []
-resolution = 0.01
+sampling_interval = 0.01
+
 
 def get_mem_used(measurements):
     amount = len(nvsmi.DeviceQuery('gpu_name,gpu_bus_id,vbios_version')["gpu"])
@@ -20,23 +21,27 @@ def get_mem_used(measurements):
 
     return mem_consumed
 
+
 def generate_report(mem_consumed):
     amount = len(mem_consumed[0])
-    x = np.arange(0, amount * resolution, resolution)
+    x = np.arange(0, amount * sampling_interval, sampling_interval)
     for i, data in enumerate(mem_consumed):
         plt.plot(x, data, label=f"GPU[{i}]")
-    plt.title("Gpu memory usage [GB]")
+    plt.title("Gpu memory usage [MB]")
     plt.legend(loc="upper left")
-    plt.ylabel("Memory [GB]")
+    plt.ylabel("Memory [MB]")
     plt.xlabel("Time [s]")
     plt.savefig("mem_consumption.png")
 
-def signal_handler(signal, frame):
+
+def signal_handler(_, __):
     mem_consumed = get_mem_used(measurements)
     mem_max = [max(m) for m in mem_consumed]
+    mem_min = [min(m) for m in mem_consumed]
     generate_report(mem_consumed)
-    for i, mem in enumerate(mem_max):
-        print(f"GPU[{i}]: max memory consumption: {mem}[GB]")
+    for i, mem in enumerate(zip(mem_min, mem_max)):
+        print(f"GPU[{i}]: min memory consumption: {mem[1]}[MB]")
+        print(f"GPU[{i}]: max memory consumption: {mem[0]}[MB]")
     sys.exit(0)
 
 
@@ -45,5 +50,4 @@ if __name__ == "__main__":
     nvsmi = nvidia_smi.getInstance()
     while True:
         measurements.append(nvsmi.DeviceQuery('memory.free, memory.total'))
-        time.sleep(resolution)
-
+        time.sleep(sampling_interval)
