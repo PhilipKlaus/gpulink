@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pynvml import *
 
+_MB = 1e6
+_SEC = 1e9
+
 
 @dataclass
 class GPUMemRecord:
@@ -72,18 +75,28 @@ def generate_memory_graph(img_path: Path, memory_records: List[GPUMemRecord]) ->
     :param memory_records: The memory_records to be plotted.
     :return: None
     """
-    mb = 1e6
-    sec = 1e9
 
     for i, rec_set in enumerate(memory_records):
-        timestamps = (rec_set.timestamps - rec_set.timestamps[0]) / sec
-        mem_usage = rec_set.used / mb
+        timestamps = (rec_set.timestamps - rec_set.timestamps[0]) / _SEC
+        mem_usage = rec_set.used / _MB
         plt.plot(timestamps, mem_usage, label=f"GPU[{i}]")
 
     plt.legend(loc="upper left")
     plt.ylabel("Memory used [MB]")
     plt.xlabel("Time [s]")
     plt.savefig(img_path.as_posix())
+
+
+def generate_cmd_output(memory_records: List[GPUMemRecord]) -> None:
+    """
+    Prints a summary of the measurements to the command line.
+    :param memory_records: The memory_records to be summed up.
+    :return: None
+    """
+    print(f"Measurement duration: {(memory_records[0].timestamps[-1] - memory_records[0].timestamps[0]) / _SEC} s]")
+    for i, rec_set in enumerate(memory_records):
+        print(f"GPU[0]: min memory consumption: {np.min(rec_set.used) / _MB}[MB]")
+        print(f"GPU[0]: max memory consumption: {np.max(rec_set.used) / _MB}[MB]")
 
 
 def _signal_handler(_, __):
@@ -114,5 +127,8 @@ if __name__ == "__main__":
         while _should_run:
             recorder.rec_memory_info()
 
+    recordings = recorder.memory_records
+    generate_cmd_output(recordings)
+
     if args.output:
-        generate_memory_graph(args.output, recorder.memory_records)
+        generate_memory_graph(args.output, recordings)
