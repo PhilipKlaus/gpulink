@@ -2,8 +2,8 @@
 A tool for monitoring and displaying GPU stats
 
 ## Installation
-1. Create a virtual python environment: `python -m venv gpu-link`
-2. Enter the environment: `.\gpu-link\Scripts\Activate`
+1. Create a virtual python environment: `python -m venv env`
+2. Enter the environment: `.\env\Scripts\Activate`
 3. Install python packages: `pip install -r requirements.txt`
 
 ## Usage
@@ -19,8 +19,8 @@ optional arguments:
 ```
 
 ## Example
-1. Enter the environment: `.\gpu-link\Scripts\Activate`
-2. Run recording `python gpu-link.py -o memory_consumption.png`
+1. Enter the environment: `.\env\Scripts\Activate`
+2. Run recording `python -m gpulink -o memory_consumption.png`
 3. Stop recording *Ctrl+C*
 4. Plot is saved to `memory_consumption.png`.
 
