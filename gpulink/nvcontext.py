@@ -1,6 +1,14 @@
 import time
+from dataclasses import dataclass
+from typing import List, Any
 
 from pynvml import nvmlInit, nvmlShutdown, nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGetName
+
+
+@dataclass
+class Result:
+    timestamp: int
+    data: Any
 
 
 class NVContext:
@@ -28,15 +36,15 @@ class NVContext:
         for i in range(device_count):
             handle = nvmlDeviceGetHandleByIndex(i)
             self._device_handles.append(handle)
-            self._device_names.append(nvmlDeviceGetName(handle).decode("utf-8") )
+            self._device_names.append(nvmlDeviceGetName(handle).decode("utf-8"))
 
-    def execute_query(self, query, *args, **kwargs):
+    def execute_query(self, query, *args, **kwargs) -> List[Result]:
         if not self.valid_ctx:
             raise RuntimeError("Cannot execute query in an invalid NVContext")
         res = []
         for handle in self._device_handles:
             timestamp = time.time_ns()
-            res.append((timestamp, query(handle, *args, **kwargs)))
+            res.append(Result(timestamp, query(handle, *args, **kwargs)))
         return res
 
     @property

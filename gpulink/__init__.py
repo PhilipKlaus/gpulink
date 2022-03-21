@@ -1,2 +1,2 @@
 from .nvcontext import NVContext
-from .memory_recorder import MemoryRecorder, GPUMemInfo, GPUMemRecording
+from .memory_recorder import MemoryRecorder, MemoryPlotter, GPUMemInfo, GPUMemRecording

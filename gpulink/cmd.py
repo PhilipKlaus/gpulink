@@ -1,13 +1,14 @@
 import argparse
 import signal
-from math import floor
 from pathlib import Path
-from typing import List
 
 import matplotlib.pyplot as plt
+import numpy as np
 
-from .memory_recorder import MemoryRecorder, GPUMemRecording
+from .memory_recorder import MemoryRecorder, MemoryPlotter
 from .nvcontext import NVContext
+
+_MB = 1e6
 
 
 def _signal_handler(_, __):
@@ -19,10 +20,6 @@ def _check_arguments(arguments):
     supported_file_types = plt.gcf().canvas.get_supported_filetypes()
     if arguments.output and arguments.output.suffix[1:] not in supported_file_types:
         raise ValueError(f"Output format '{arguments.output.suffix}' not supported")
-
-
-def _get_measurement_duration(mem_records: List[GPUMemRecording]):
-    return (mem_records[0].time_ns[-1] - mem_records[0].time_ns[0]) / 1e9
 
 
 _should_run = True
@@ -41,13 +38,22 @@ def main():
         while _should_run:
             recorder.record()
 
-    if args.output:
-        recorder.save_graph(args.output)
+    recordings = recorder.get_records()
 
-    duration = _get_measurement_duration(recorder.records)
-    print(f"Measurement duration: {duration}[s]")
-    print(f"Average frame rate: {floor(recorder.num_records / duration)}[Hz]")
-    print(recorder)
+    if args.output:
+        graph = MemoryPlotter(recordings)
+        graph.save(args.output)
+
+    print(f"Measurement duration: {recordings[0].duration}[s]")
+    print(f"Average frame rate: {recordings[0].sampling_rate}[Hz]")
+    for rec in recordings:
+        idx = rec.device_idx
+        name = rec.device_name
+        print(
+            f"{name}[{idx}] -> memory used: "
+            f"min={np.min(rec.used_bytes) / _MB}[MB] / "
+            f"max={np.max(rec.used_bytes) / _MB}[MB]"
+        )
 
 
 if __name__ == "__main__":

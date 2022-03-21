@@ -1,12 +1,15 @@
+from copy import deepcopy
 from dataclasses import dataclass
+from math import floor
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import numpy as np
 from matplotlib import pyplot as plt
 from pynvml import nvmlDeviceGetMemoryInfo
 
 from .nvcontext import NVContext
+from .recorder import Recorder
 
 _MB = 1e6
 _SEC = 1e9
@@ -15,8 +18,10 @@ _SEC = 1e9
 @dataclass
 class GPUMemInfo:
     """
-    Stores the memory usage for a single GPU device.
+    Stores memory information for a single GPU device.
     """
+    device_idx: int
+    device_name: str
     time_ns: int
     total_bytes: int
     used_bytes: int
@@ -28,85 +33,92 @@ class GPUMemRecording:
     """
     Stores memory recordings for a single GPU device.
     """
+    device_idx: int
+    device_name: str
+    total_bytes: int
     time_ns: np.ndarray
-    total_bytes: np.ndarray
     used_bytes: np.ndarray
 
+    @property
+    def len(self):
+        return len(self.time_ns)
 
-# ToDo: Store only used memory
-# ToDo: Adapt dataclasses and str representation
-class MemoryRecorder:
+    @property
+    def duration(self):
+        return (self.time_ns[-1] - self.time_ns[0]) / _SEC
+
+    @property
+    def sampling_rate(self):
+        return floor(self.len / self.duration)
+
+
+class MemoryRecorder(Recorder):
     """
     Manages GPU memory recording.
     """
 
     def __init__(self, ctx: NVContext):
         self._ctx = ctx
-        self._memory_records = []
-        self._time_ns = []
-        self._total_bytes = []
-        self._used_bytes = []
-        self._free_bytes = []
+        self._records: List[GPUMemRecording] = []
+        self._gpu_names: List[str] = []
         self.clear()
 
-    def record(self) -> List[GPUMemInfo]:
+    def record(self, store=True) -> List[GPUMemInfo]:
         """
         Records and returns the actual GPU Memory usage.
+        :param store: Specify if the record shall be stored (default=True)
         :return: A GPUMemRecord for each GPU in a List.
         """
-        mem_info = self.memory_info
-        for i, entry in enumerate(mem_info):
-            self._memory_records[i]["time_ns"].append(entry.time_ns)
-            self._memory_records[i]["total_bytes"].append(entry.total_bytes)
-            self._memory_records[i]["used_bytes"].append(entry.used_bytes)
+        mem_info = []
+        for idx, res in enumerate(self._ctx.execute_query(nvmlDeviceGetMemoryInfo)):
+            timestamp = res.timestamp
+            data = res.data
+            mem_info.append(GPUMemInfo(idx, self._gpu_names[idx], timestamp, data.total, data.used, data.free))
+            if store:
+                self._records[idx].time_ns.append(timestamp)
+                self._records[idx].used_bytes.append(data.used)
         return mem_info
 
     def clear(self) -> None:
         """
         Clear all previous records
-        :return:
         """
-        self._memory_records = [{"time_ns": [], "total_bytes": [], "used_bytes": []} for _ in range(self._ctx.gpus)]
+        self._gpu_names = self._ctx.gpu_names
+        records = self.record(store=False)
+        self._records = []
+        for rec in records:
+            self._records.append(GPUMemRecording(rec.device_idx, rec.device_name, rec.total_bytes, [], []))
 
-    @property
-    def memory_info(self) -> List[GPUMemInfo]:
-        """
-        Returns the actual GPU Memory usage without recording.
-        :return: A GPUMemRecord for each GPU in a List.
-        """
-        mem_info = []
-        for rec in self._ctx.execute_query(nvmlDeviceGetMemoryInfo):
-            mem_info.append(GPUMemInfo(rec[0], rec[1].total, rec[1].used, rec[1].free))
-        return mem_info
+    def get_records(self) -> List[GPUMemRecording]:
+        records = []
+        for rec in self._records:
+            new_rec = deepcopy(rec)
+            new_rec.time_ns = np.array(new_rec.time_ns)
+            new_rec.used_bytes = np.array(new_rec.used_bytes)
+            records.append(new_rec)
+        return records
 
-    @property
-    def records(self) -> List[GPUMemRecording]:
-        """
-        Get all GPU memory recordings.
-        :return: The memory recordings as a List of GPUMemRecording.
-        """
-        return [
-            GPUMemRecording(np.array(r["time_ns"]), np.array(r["total_bytes"]), np.array(r["used_bytes"]))
-            for r in self._memory_records]
 
-    @property
-    def num_records(self) -> int:
-        """
-        Get the number of stored records.
-        :return: The number of stored records
-        """
-        return len(self.records[0].time_ns)
+class MemoryPlotter:
+    """
+    Draws a GPU memory graph from a given GPUMemRecording.
+    """
+
+    def __init__(self, recording: Union[GPUMemRecording, List[GPUMemRecording]]):
+        self._recording = recording
+        if not isinstance(self._recording, list):
+            self._recording = [self._recording]
 
     def _generate_graph(self, show_total_mem=False) -> None:
-        if self.num_records == 0:
-            raise RuntimeError("No memory records available")
-
         max_mem = 0
-        for i, rec_set in enumerate(self.records):
-            max_mem = max(max_mem, np.max(rec_set.total_bytes))
-            timestamps = (rec_set.time_ns - rec_set.time_ns[0]) / _SEC
-            mem_usage = rec_set.used_bytes / _MB
-            plt.plot(timestamps, mem_usage, label=f"GPU[{i}]")
+        for rec in self._recording:
+            if rec.len == 0:
+                raise RuntimeError("Memory recording is empty")
+
+            max_mem = max(max_mem, rec.total_bytes)
+            timestamps = (rec.time_ns - rec.time_ns[0]) / _SEC
+            mem_usage = rec.used_bytes / _MB
+            plt.plot(timestamps, mem_usage, label=f"GPU[{rec.device_idx}]")
 
         if show_total_mem:
             plt.ylim([0, max_mem / _MB])
@@ -114,27 +126,19 @@ class MemoryRecorder:
         plt.ylabel("Memory used [MB]")
         plt.xlabel("Time [s]")
 
-    def save_graph(self, img_path: Path, show_total_mem=False) -> None:
+    def save(self, img_path: Path, show_total_mem=False) -> None:
         """
-        Generates and saves a GPU memory usage graph.
+        Generates and saves a GPU memory graph.
         :param img_path: The path to the image file.
         :param show_total_mem: Show total memory on the y-axis.
         """
         self._generate_graph(show_total_mem)
         plt.savefig(img_path.as_posix())
 
-    def draw_graph(self, show_total_mem=False) -> None:
+    def plot(self, show_total_mem=False) -> None:
         """
-        Generates a GPU memory usage graph.
+        Generates a GPU memory graph.
         :param show_total_mem: Scale y-axis to the total available GPU memory.
         """
         self._generate_graph(show_total_mem)
         plt.show()
-
-    def __repr__(self) -> str:
-        repr = f"MemoryRecorder: captured: {self.num_records} records\n"
-        if self.num_records > 0:
-            for i, data in enumerate(zip(self.records, self._ctx.gpu_names)):
-                repr += f"GPU[{i}] ({data[1]}): min memory consumption: {np.min(data[0].used_bytes) / _MB}[MB]\n"
-                repr += f"GPU[{i}] ({data[1]}): max memory consumption: {np.max(data[0].used_bytes) / _MB}[MB]\n"
-        return repr
