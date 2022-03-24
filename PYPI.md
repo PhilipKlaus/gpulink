@@ -75,5 +75,3 @@ optional arguments:
 ```
 NVIDIA TITAN RTX[0] -> memory used: min=1729.236992[MB] / max=2315.79648[MB]
 ```
-
-![Memory consumption over time](./docs/mem_consumption.png)

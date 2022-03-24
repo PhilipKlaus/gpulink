@@ -52,9 +52,10 @@ class NVContext:
         return self._valid_ctx
 
     @property
-    def gpus(self):
+    def gpu_amount(self):
         return len(self._device_handles)
 
     @property
     def gpu_names(self):
         return self._device_names
+

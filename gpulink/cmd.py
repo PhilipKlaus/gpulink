@@ -1,14 +1,19 @@
 import argparse
+import logging
 import signal
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .memory_recorder import MemoryRecorder, MemoryPlotter
+from gpulink import MemoryPlotter
+from .memory_recorder import MemoryRecorder
 from .nvcontext import NVContext
 
 _MB = 1e6
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+_LOGGER = logging.getLogger(__name__)
 
 
 def _signal_handler(_, __):
@@ -35,6 +40,7 @@ def main():
     signal.signal(signal.SIGINT, _signal_handler)
     with NVContext() as ctx:
         recorder = MemoryRecorder(ctx)
+        _LOGGER.info(f"Start recording...")
         while _should_run:
             recorder.record()
 
@@ -42,18 +48,16 @@ def main():
 
     if args.output:
         graph = MemoryPlotter(recordings)
-        graph.save(args.output)
+        graph.save(args.output, show_total_mem=True)
 
-    print(f"Measurement duration: {recordings[0].duration}[s]")
-    print(f"Average frame rate: {recordings[0].sampling_rate}[Hz]")
+    _LOGGER.info(f"Measurement duration: {recordings[0].duration}[s]")
+    _LOGGER.info(f"Average frame rate: {recordings[0].sampling_rate}[Hz]")
     for rec in recordings:
         idx = rec.device_idx
         name = rec.device_name
-        print(
-            f"{name}[{idx}] -> memory used: "
-            f"min={np.min(rec.used_bytes) / _MB}[MB] / "
-            f"max={np.max(rec.used_bytes) / _MB}[MB]"
-        )
+        _LOGGER.info(f"{name}[{idx}] -> memory used: "
+                     f"min={np.min(rec.used_bytes) / _MB}[MB] / "
+                     f"max={np.max(rec.used_bytes) / _MB}[MB]")
 
 
 if __name__ == "__main__":
