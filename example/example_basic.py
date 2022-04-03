@@ -16,5 +16,5 @@ with gpu.NVContext() as ctx:
         print(f"Number of records: {rec.len}")
         print(rec)
 
-    graph = gpu.MemoryPlotter(records)
+    graph = gpu.MemoryPlot(records)
     graph.plot()

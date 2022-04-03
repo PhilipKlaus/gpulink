@@ -3,18 +3,18 @@ from typing import Union, List
 
 from matplotlib import pyplot as plt
 
-from gpulink import GPUMemRecording
+from .recorder import GPURecording
 
 _MB = 1e6
 _SEC = 1e9
 
 
-class MemoryPlotter:
+class MemoryPlot:
     """
     Draws a GPU memory graph from a given GPUMemRecording.
     """
 
-    def __init__(self, recording: Union[GPUMemRecording, List[GPUMemRecording]]):
+    def __init__(self, recording: Union[GPURecording, List[GPURecording]]):
         self._recording = recording
         if not isinstance(self._recording, list):
             self._recording = [self._recording]
@@ -25,10 +25,10 @@ class MemoryPlotter:
             if rec.len == 0:
                 raise RuntimeError("Memory recording is empty")
 
-            max_mem = max(max_mem, rec.total_bytes)
+            max_mem = max(max_mem, rec.metadata.total_bytes)
             timestamps = (rec.time_ns - rec.time_ns[0]) / _SEC
-            mem_usage = rec.used_bytes / _MB
-            plt.plot(timestamps, mem_usage, label=f"GPU[{rec.device_idx}]")
+            mem_usage = rec.data / _MB
+            plt.plot(timestamps, mem_usage, label=f"GPU[{rec.metadata.device_idx}]")
 
         if show_total_mem:
             plt.ylim([0, max_mem / _MB])

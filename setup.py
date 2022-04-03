@@ -4,8 +4,8 @@ with open("PYPI.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="gpulink-phil.k",
-    version="0.1.2",
+    name="gpulink",
+    version="0.1.0",
     author="Philip Klaus",
     description="A simple tool for monitoring and displaying GPU stats",
     long_description=long_description,
