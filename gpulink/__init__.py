@@ -1,3 +1,3 @@
 from .nvcontext import NVContext
-from .plot import MemoryPlot
+from .plot import Plot
 from .recorder import Recorder, RecType

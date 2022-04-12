@@ -3,7 +3,7 @@ from typing import Optional
 
 from matplotlib import pyplot as plt
 
-from gpulink import MemoryPlot
+from gpulink import Plot
 from gpulink import NVContext, Recorder
 from gpulink.cli.tools import busy_wait_for_interrupt
 from gpulink.types import GPURecording, RecType
@@ -17,7 +17,7 @@ def _check_output_file_type(output_path: Path):
 
 def _store_records(recording: GPURecording, output_path: Optional[Path]):
     if output_path:
-        graph = MemoryPlot(recording)
+        graph = Plot(recording)
         graph.save(output_path, scale_y_axis=True)
 
 

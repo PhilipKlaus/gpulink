@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from math import floor
-from typing import List, Any, Union
+from typing import List, Union
 
 import numpy as np
 from tabulate import tabulate
@@ -9,13 +9,14 @@ from tabulate import tabulate
 from gpulink.consts import MB, SEC
 
 
+@dataclass
+class Unit:
+    name: str
+    value: Union[int, float]
+
+
 class RecType(Enum):
-    MEMORY_USED = "Memory"
-
-
-_REC_TYPE_UNITS = {
-    RecType.MEMORY_USED: "MB"
-}
+    MEMORY_USED = ("Memory", Unit("MB", MB))
 
 
 ###########################################################################
@@ -48,6 +49,11 @@ class GPUMemInfo(GPUQueryResult):
 ############################################################################
 
 @dataclass
+class PlotInfo:
+    max_values: List[Union[int, float]]
+
+
+@dataclass
 class GPURecording:
     """
     A container for storing a gpu recording
@@ -57,7 +63,7 @@ class GPURecording:
     gpu_names: List[str]  # List of GPU names
     timestamps: List[np.ndarray]  # List of numpy arrays of recording timestamps
     data: List[np.ndarray]  # List of numpy arrays of recording data
-    max_values: List[Any]  # List of maximum values of the actual recording data (per GPU)
+    plot_info: PlotInfo  # Additional information for plotting
 
     @property
     def duration(self):
@@ -85,7 +91,7 @@ class GPURecording:
             tablefmt='fancy_grid')
 
     def _create_data_table(self):
-        table = [["GPU", "Name", f"{self.type.value} [{_REC_TYPE_UNITS.get(self.type)}]"]]
+        table = [["GPU", "Name", f"{self.type.value[0]} [{self.type.value[1].name}]"]]
         for idx, name in zip(self.gpus, self.gpu_names):
             table.append([idx, name, f"minimum: {np.min(self.data) / MB}\nmaximum: {np.max(self.data) / MB}"])
         return tabulate(table, tablefmt='fancy_grid')
