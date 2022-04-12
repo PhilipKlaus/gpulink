@@ -1,5 +1,5 @@
 from time import time_ns
-from typing import List, Type, cast
+from typing import List, Type, cast, Optional
 
 from pynvml import nvmlInit, nvmlShutdown, nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGetName, \
     nvmlDeviceGetMemoryInfo, nvmlDeviceGetFanSpeed_v2, nvmlDeviceGetFanSpeed, nvmlDeviceGetTemperature, \
@@ -75,25 +75,26 @@ class NVContext:
     def gpu_names(self) -> List[str]:
         return self._device_names
 
-    def get_memory_info(self, gpus: List[int] = None) -> List[GPUMemInfo]:
+    def get_memory_info(self, gpus: Optional[List[int]]) -> List[GPUMemInfo]:
         return cast(List[GPUMemInfo], self.execute(nvmlDeviceGetMemoryInfo, GPUMemInfo, gpus))
 
-    def get_fan_speed(self, gpus: List[int] = None, fan=None) -> List[GPUQuerySingleResult]:
+    def get_fan_speed(self, gpus: Optional[List[int]], fan=None) -> List[GPUQuerySingleResult]:
         if fan is not None:
             return cast(List[GPUQuerySingleResult], self.execute(nvmlDeviceGetFanSpeed_v2, GPUQuerySingleResult, gpus))
         else:
             return cast(List[GPUQuerySingleResult], self.execute(nvmlDeviceGetFanSpeed, GPUQuerySingleResult, gpus))
 
-    def get_temperature(self, sensor_type: TemperatureSensorType, gpus: List[int] = None) -> List[GPUQuerySingleResult]:
+    def get_temperature(self, gpus: Optional[List[int]], sensor_type: TemperatureSensorType) -> \
+            List[GPUQuerySingleResult]:
         return cast(List[GPUQuerySingleResult],
                     self.execute(nvmlDeviceGetTemperature, GPUQuerySingleResult, gpus, sensor_type.value))
 
-    def get_temperature_threshold(self, threshold: TemperatureThreshold, gpus: List[int] = None) -> \
+    def get_temperature_threshold(self, gpus: Optional[List[int]], threshold: TemperatureThreshold) -> \
             List[GPUQuerySingleResult]:
         return cast(List[GPUQuerySingleResult],
                     self.execute(nvmlDeviceGetTemperatureThreshold, GPUQuerySingleResult, gpus, threshold.value))
 
-    def get_clock(self, clock_type: ClockType, gpus: List[int] = None, clock_id: ClockId = None) -> \
+    def get_clock(self, gpus: Optional[List[int]], clock_type: ClockType, clock_id: ClockId = None) -> \
             List[GPUQuerySingleResult]:
         if clock_id is not None:
             return cast(List[GPUQuerySingleResult],
@@ -102,6 +103,6 @@ class NVContext:
             return cast(List[GPUQuerySingleResult],
                         self.execute(nvmlDeviceGetClockInfo, GPUQuerySingleResult, gpus, clock_type.value))
 
-    def get_power_usage(self, gpus: List[int] = None) -> List[GPUQuerySingleResult]:
+    def get_power_usage(self, gpus: Optional[List[int]]) -> List[GPUQuerySingleResult]:
         return cast(List[GPUQuerySingleResult],
                     self.execute(nvmlDeviceGetPowerUsage, GPUQuerySingleResult, gpus))

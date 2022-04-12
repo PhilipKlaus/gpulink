@@ -13,6 +13,11 @@ class RecType(Enum):
     MEMORY_USED = "Memory"
 
 
+_REC_TYPE_UNITS = {
+    RecType.MEMORY_USED: "MB"
+}
+
+
 ###########################################################################
 
 @dataclass
@@ -71,25 +76,24 @@ class GPURecording:
         amount_records = (len(self.gpus) * self.timestamps[0].shape[0])
         return floor(amount_records / self.duration)
 
-    def __str__(self):
-        table_metadata = tabulate(
-            [["Record duration [s]", "Frame rate [Hz]"],
-             [self.duration, self.sampling_rate]],
+    def _create_metadata_table(self):
+        return tabulate(
+            [
+                ["Record duration [s]", "Frame rate [Hz]"],
+                [self.duration, self.sampling_rate]
+            ],
             tablefmt='fancy_grid')
 
-        unit_mapping = {
-            RecType.MEMORY_USED: "MB"
-        }
-
-        table = [["GPU", "Name", f"{self.type.value} [{unit_mapping.get(self.type)}]"]]
+    def _create_data_table(self):
+        table = [["GPU", "Name", f"{self.type.value} [{_REC_TYPE_UNITS.get(self.type)}]"]]
         for idx, name in zip(self.gpus, self.gpu_names):
-            if self.type == RecType.MEMORY_USED:
-                data = f"minimum: {np.min(self.data) / MB}\nmaximum: {np.max(self.data) / MB}"
-            else:
-                raise TypeError(f"RecType {self.type.value} is not supported")
-            table.append([idx, name, data])
+            table.append([idx, name, f"minimum: {np.min(self.data) / MB}\nmaximum: {np.max(self.data) / MB}"])
+        return tabulate(table, tablefmt='fancy_grid')
 
-        return f"{table_metadata}\n{tabulate(table, tablefmt='fancy_grid')}"
+    def __str__(self):
+        metadata_table = self._create_metadata_table()
+        data_table = self._create_data_table()
+        return f"{metadata_table}\n{data_table}"
 
 
 ##############################################################################

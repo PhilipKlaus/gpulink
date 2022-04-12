@@ -52,12 +52,12 @@ def test_nvcontext_properties_with_invalid_ctx():
 def test_execute_raises_on_invalid_context():
     ctx = NVContext()
     with pytest.raises(RuntimeError, match="Cannot execute query in an invalid NVContext"):
-        ctx.get_memory_info()
+        ctx.get_memory_info(None)
 
 
 def test_get_memory_info():
     with NVContext() as ctx:
-        assert ctx.get_memory_info() == [
+        assert ctx.get_memory_info(None) == [
             GPUMemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=0, timestamp=0, gpu_name="GPU_TEST"),
             GPUMemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=1, timestamp=0, gpu_name="GPU_TEST")]
         assert ctx.get_memory_info(gpus=[1]) == [
@@ -67,11 +67,7 @@ def test_get_memory_info():
 
 def test_get_fan_speed():
     with NVContext() as ctx:
-        assert ctx.get_fan_speed() == [
-            GPUQuerySingleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT),
-            GPUQuerySingleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT)
-        ]
-        assert ctx.get_fan_speed(gpus=[0, 1], fan=0) == [
+        assert ctx.get_fan_speed(ctx.gpus, fan=0) == [
             GPUQuerySingleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT // 2),
             GPUQuerySingleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT // 2)
         ]
@@ -79,7 +75,7 @@ def test_get_fan_speed():
 
 def test_get_temperature():
     with NVContext() as ctx:
-        assert ctx.get_temperature(TemperatureSensorType.GPU) == [
+        assert ctx.get_temperature(ctx.gpus, TemperatureSensorType.GPU) == [
             GPUQuerySingleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_TMP),
             GPUQuerySingleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP)
         ]
@@ -87,7 +83,7 @@ def test_get_temperature():
 
 def test_get_temperature_threshold():
     with NVContext() as ctx:
-        assert ctx.get_temperature_threshold(TemperatureThreshold.TEMPERATURE_THRESHOLD_GPU_MAX) == [
+        assert ctx.get_temperature_threshold(ctx.gpus, TemperatureThreshold.TEMPERATURE_THRESHOLD_GPU_MAX) == [
             GPUQuerySingleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2),
             GPUQuerySingleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2)
         ]
@@ -95,7 +91,7 @@ def test_get_temperature_threshold():
 
 def test_get_clock():
     with NVContext() as ctx:
-        assert ctx.get_temperature_threshold(TemperatureThreshold.TEMPERATURE_THRESHOLD_GPU_MAX) == [
+        assert ctx.get_temperature_threshold(ctx.gpus, TemperatureThreshold.TEMPERATURE_THRESHOLD_GPU_MAX) == [
             GPUQuerySingleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2),
             GPUQuerySingleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2)
         ]
@@ -103,7 +99,7 @@ def test_get_clock():
 
 def test_get_power_usage():
     with NVContext() as ctx:
-        assert ctx.get_power_usage() == [
+        assert ctx.get_power_usage(ctx.gpus) == [
             GPUQuerySingleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_POWER_CONSUMPTION),
             GPUQuerySingleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_POWER_CONSUMPTION)
         ]

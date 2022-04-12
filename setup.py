@@ -28,7 +28,7 @@ setup(
     ],
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': ['gpulink=gpulink.cmd:main'],
+        'console_scripts': ['gpulink=gpulink.__main__:main'],
     },
 
 )

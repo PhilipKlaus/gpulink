@@ -27,7 +27,7 @@ def record(args):
     _check_output_file_type(args.output)
 
     with NVContext() as ctx:
-        recorder = Recorder(ctx, RecType.MEMORY_USED, ctx.gpus)
+        recorder = Recorder.create_memory_recorder(ctx, ctx.gpus)
         busy_wait_for_interrupt(recorder, "[RECORDING]")
         recording = recorder.get_recording()
 

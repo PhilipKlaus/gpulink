@@ -21,14 +21,14 @@ class SensorWatcher(StoppableThread):
         table = [header]
 
         gpus = self._ctx.gpus
-        mem = self._ctx.get_memory_info()
-        tmp = self._ctx.get_temperature(TemperatureSensorType.GPU)
-        fan = self._ctx.get_fan_speed()
+        mem = self._ctx.get_memory_info(gpus)
+        tmp = self._ctx.get_temperature(gpus, TemperatureSensorType.GPU)
+        fan = self._ctx.get_fan_speed(gpus)
         clock = zip(
-            self._ctx.get_clock(ClockType.CLOCK_GRAPHICS),
-            self._ctx.get_clock(ClockType.CLOCK_MEM),
-            self._ctx.get_clock(ClockType.CLOCK_SM),
-            self._ctx.get_clock(ClockType.CLOCK_VIDEO),
+            self._ctx.get_clock(gpus, ClockType.CLOCK_GRAPHICS),
+            self._ctx.get_clock(gpus, ClockType.CLOCK_MEM),
+            self._ctx.get_clock(gpus, ClockType.CLOCK_SM),
+            self._ctx.get_clock(gpus, ClockType.CLOCK_VIDEO),
         )
 
         for data in zip(gpus, mem, tmp, fan, clock):
