@@ -1,20 +1,18 @@
+import time
+
 import gpulink as gpu
+from gpulink.recorder import Recorder, RecType
 
 with gpu.NVContext() as ctx:
-    print(f"Available GPUs: {ctx.gpu_names}")
 
-    recorder = gpu.MemoryRecorder(ctx)
-    mem_info = recorder.record(store=False)
+    print(f"Available GPUs: {ctx.gpus}")
+    print(f"Single Memory Info query: {ctx.get_memory_info()}")
 
-    for _ in range(5):  # Record memory information over time
-        recorder.record()
+    recorder = Recorder(ctx, RecType.MEMORY_USED, ctx.gpus)
+    recorder.start()
+    time.sleep(3)  # Record for 3 seconds
+    recorder.stop()
+    recorder.join()
 
-    records = recorder.get_records()
-    for rec in records:
-        print(f"Sampling rate: {rec.sampling_rate}")
-        print(f"Recording duration: {rec.duration}")
-        print(f"Number of records: {rec.len}")
-        print(rec)
-
-    graph = gpu.MemoryPlot(records)
-    graph.plot()
+    recording = recorder.get_recording()
+    print(recording)

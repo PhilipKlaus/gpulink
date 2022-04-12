@@ -1,3 +1,3 @@
-from .cmd import main
+from gpulink.cli.cmd import main
 
 main()
