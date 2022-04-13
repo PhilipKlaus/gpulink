@@ -17,7 +17,7 @@ def _clean_matplotlib():
 
 class Plot:
     """
-    Draws a GPU memory graph from a given GPUMemRecording.
+    Plots recorded GPU properties over time.
     """
 
     def __init__(self, recording: GPURecording):
@@ -30,6 +30,12 @@ class Plot:
         ax.set_xlabel("Time [s]")
 
     def generate_graph(self, scale_y_axis) -> Tuple[Figure, Axis]:
+        """
+        Generates the plot.
+        :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
+        means that the y-axis is scaled to the actual consumed memory and not to the maximum available memory.
+        :return: A Tuple containing the generated Figure and Axis.
+        """
         _clean_matplotlib()
         unit_divider = self._recording.type.value[1].value
         max_val = 0
@@ -60,7 +66,7 @@ class Plot:
 
     def save(self, img_path: Path, scale_y_axis=False) -> None:
         """
-        Generates and saves a GPU memory graph.
+        Generates and saves a Plot as an image.
         :param img_path: The path to the image file.
         :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
         means that the y-axis is scaled to the actual consumed memory and not to the maximum available memory.
@@ -70,7 +76,7 @@ class Plot:
 
     def plot(self, scale_y_axis=False) -> None:
         """
-        Generates a GPU memory graph.
+        Generates and display a Plot.
         :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
         means that the y-axis is scaled to the actual consumed memory and not to the maximum available memory.
         """

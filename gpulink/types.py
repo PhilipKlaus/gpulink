@@ -16,6 +16,9 @@ class Unit:
 
 
 class RecType(Enum):
+    """
+    Recordable types of GPU properties.
+    """
     MEMORY_USED = ("Memory used", Unit("MB", MB))
 
 
@@ -24,7 +27,7 @@ class RecType(Enum):
 @dataclass
 class GPUQueryResult:
     """
-    Represents the base class for a single GPU query result
+    Represents the base class for a single GPU query result.
     """
     timestamp: int
     gpu_idx: int
@@ -33,6 +36,9 @@ class GPUQueryResult:
 
 @dataclass
 class GPUQuerySingleResult(GPUQueryResult):
+    """
+    A GPUQueryResult containing only a single value.
+    """
     value: Union[int, float, str]
 
 
@@ -68,7 +74,7 @@ class GPURecording:
     @property
     def duration(self):
         """
-        Calculates the recording duration in Seconds.
+        Calculates the recording duration in seconds.
         :return: The recording duration in seconds
         """
         return (self.timestamps[-1][-1] - self.timestamps[0][0]) / SEC
@@ -106,6 +112,9 @@ class GPURecording:
 
 @dataclass
 class SensorStatus:
+    """
+    A container for storing several sensor status.
+    """
     gpus: List[int]
     memory: List[GPUMemInfo]
     temperature: List[GPUQuerySingleResult]

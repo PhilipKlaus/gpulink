@@ -11,7 +11,7 @@ from gpulink.types import GPUMemInfo, GPUQueryResult, TemperatureThreshold, Cloc
 
 class NVContext:
     """
-    Context for executing nvml queries.
+    A context for executing nvml queries.
     """
 
     def __init__(self):
@@ -38,7 +38,7 @@ class NVContext:
             self._device_names.append(nvmlDeviceGetName(handle).decode("utf-8"))
             self._device_ids.append(i)
 
-    def execute(self, query, type: Type, gpus: List[int], *args, **kwargs) -> List[GPUQueryResult]:
+    def _execute(self, query, type: Type, gpus: List[int], *args, **kwargs) -> List[GPUQueryResult]:
         if not self.valid_ctx:
             raise RuntimeError("Cannot execute query in an invalid NVContext")
         if not gpus or len(gpus) == 0:
@@ -65,44 +65,91 @@ class NVContext:
 
     @property
     def valid_ctx(self):
+        """
+        Queries if the actual NVContext is valid.
+        :return: True if the actual NVContext is valid, else False
+        """
         return self._valid_ctx
 
     @property
     def gpus(self) -> List[int]:
+        """
+        Queries the indices of all active GPUs
+        :return: The indices of all active GPUs in a List
+        """
         return self._device_ids
 
     @property
     def gpu_names(self) -> List[str]:
+        """
+        Queries the names of all active GPUs
+        :return: The names of all active GPUs in a list
+        """
         return self._device_names
 
     def get_memory_info(self, gpus: Optional[List[int]]) -> List[GPUMemInfo]:
-        return cast(List[GPUMemInfo], self.execute(nvmlDeviceGetMemoryInfo, GPUMemInfo, gpus))
+        """
+        Queries the memory information [Bytes] using nvmlDeviceGetMemoryInfo.
+        :param gpus: A list of indices from GPU to be queried.
+        :return: A list of GPUMemInfo.
+        """
+        return cast(List[GPUMemInfo], self._execute(nvmlDeviceGetMemoryInfo, GPUMemInfo, gpus))
 
     def get_fan_speed(self, gpus: Optional[List[int]], fan=None) -> List[GPUQuerySingleResult]:
+        """
+        Queries the fan speed [%] using nvmlDeviceGetFanSpeed_v2 and nvmlDeviceGetFanSpeed.
+        :param gpus: A list of indices from GPU to be queried.
+        :param fan: The index of the fan to be queried.
+        :return: A list GPUQuerySingleResult.
+        """
         if fan is not None:
-            return cast(List[GPUQuerySingleResult], self.execute(nvmlDeviceGetFanSpeed_v2, GPUQuerySingleResult, gpus))
+            return cast(List[GPUQuerySingleResult], self._execute(nvmlDeviceGetFanSpeed_v2, GPUQuerySingleResult, gpus))
         else:
-            return cast(List[GPUQuerySingleResult], self.execute(nvmlDeviceGetFanSpeed, GPUQuerySingleResult, gpus))
+            return cast(List[GPUQuerySingleResult], self._execute(nvmlDeviceGetFanSpeed, GPUQuerySingleResult, gpus))
 
     def get_temperature(self, gpus: Optional[List[int]], sensor_type: TemperatureSensorType) -> \
             List[GPUQuerySingleResult]:
+        """
+        Queries the temperature [°C] using nvmlDeviceGetTemperature.
+        :param gpus: A list of indices from GPU to be queried.
+        :param sensor_type:The type of the actual temperature sensor to be queried.
+        :return: A List of GPUQuerySingleResult.
+        """
         return cast(List[GPUQuerySingleResult],
-                    self.execute(nvmlDeviceGetTemperature, GPUQuerySingleResult, gpus, sensor_type.value))
+                    self._execute(nvmlDeviceGetTemperature, GPUQuerySingleResult, gpus, sensor_type.value))
 
     def get_temperature_threshold(self, gpus: Optional[List[int]], threshold: TemperatureThreshold) -> \
             List[GPUQuerySingleResult]:
+        """
+        Queries the temperature threshold [°C] using nvmlDeviceGetTemperatureThreshold.
+        :param gpus: A list of indices from GPU to be queried.
+        :param threshold: The type of threshold to be queried.
+        :return: A List of GPUQuerySingleResult.
+        """
         return cast(List[GPUQuerySingleResult],
-                    self.execute(nvmlDeviceGetTemperatureThreshold, GPUQuerySingleResult, gpus, threshold.value))
+                    self._execute(nvmlDeviceGetTemperatureThreshold, GPUQuerySingleResult, gpus, threshold.value))
 
     def get_clock(self, gpus: Optional[List[int]], clock_type: ClockType, clock_id: ClockId = None) -> \
             List[GPUQuerySingleResult]:
+        """
+        Queries the clock speed [MHz] using nvmlDeviceGetClock and nvmlDeviceGetClockInfo.
+        :param gpus: A list of indices from GPU to be queried.
+        :param clock_type: The type of clock to be queried.
+        :param clock_id: The id of the clock to be queried.
+        :return: A List of GPUQuerySingleResult.
+        """
         if clock_id is not None:
             return cast(List[GPUQuerySingleResult],
-                        self.execute(nvmlDeviceGetClock, GPUQuerySingleResult, gpus, clock_type, clock_id.value))
+                        self._execute(nvmlDeviceGetClock, GPUQuerySingleResult, gpus, clock_type, clock_id.value))
         else:
             return cast(List[GPUQuerySingleResult],
-                        self.execute(nvmlDeviceGetClockInfo, GPUQuerySingleResult, gpus, clock_type.value))
+                        self._execute(nvmlDeviceGetClockInfo, GPUQuerySingleResult, gpus, clock_type.value))
 
     def get_power_usage(self, gpus: Optional[List[int]]) -> List[GPUQuerySingleResult]:
+        """
+        Queries the power usage [mW] using nvmlDeviceGetPowerUsage.
+        :param gpus: A list of indices from GPU to be queried.
+        :return: A List of GPUQuerySingleResult.
+        """
         return cast(List[GPUQuerySingleResult],
-                    self.execute(nvmlDeviceGetPowerUsage, GPUQuerySingleResult, gpus))
+                    self._execute(nvmlDeviceGetPowerUsage, GPUQuerySingleResult, gpus))

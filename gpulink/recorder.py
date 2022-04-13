@@ -9,6 +9,9 @@ from gpulink.types import GPURecording, RecType, PlotInfo
 
 
 class Recorder(StoppableThread):
+    """
+    A recorder for GPU properties.
+    """
     __create_key = object()
 
     def __init__(self, create_key, ctx: NVContext, rec_type: RecType, gpus: List[int], *args, **kwargs):
@@ -30,6 +33,12 @@ class Recorder(StoppableThread):
 
     @classmethod
     def create_memory_recorder(cls, ctx: NVContext, gpus: List[int]):
+        """
+        Factory method to instantiate a Recorder.
+        :param ctx: A valid NVContext.
+        :param gpus: The indices of the GPUs to be recorded.
+        :return: An instance of Recorder.
+        """
         return Recorder(cls.__create_key, ctx, RecType.MEMORY_USED, gpus)
 
     def _get_ctx_function(self) -> Tuple[Callable, Any]:
@@ -61,6 +70,10 @@ class Recorder(StoppableThread):
             return None
 
     def get_recording(self) -> GPURecording:
+        """
+        Get the actual recording data after the Recorder was stopped (using the stop() method)
+        :return: Recording data as GPURecording.
+        """
         return GPURecording(
             type=self._rec_type,
             gpus=self._gpus,
