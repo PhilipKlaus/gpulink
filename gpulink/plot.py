@@ -80,5 +80,6 @@ class Plot:
         :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
         means that the y-axis is scaled to the actual consumed memory and not to the maximum available memory.
         """
-        self.generate_graph(scale_y_axis)
+        fig, _ = self.generate_graph(scale_y_axis)
+        fig.canvas.manager.set_window_title("GPULink")
         plt.show()
