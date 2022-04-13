@@ -1,79 +1,128 @@
 # gpulink
 
-A library for monitoring and displaying NVIDIA GPU stats. For this purpose
-**gpulink** provides classes for data recording and plotting, targeting different GPU stats (e.g. memory consumption).
-**gpulink** makes use of [pynvml](https://github.com/gpuopenanalytics/pynvml) - a Python wrapper for
+A library for monitoring and displaying NVIDIA GPU stats.  
+**gpulink** uses [pynvml](https://github.com/gpuopenanalytics/pynvml) - a Python wrapper for
 the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-library-nvml) (NVML).
 
-| Feature        | Status | Notes |
-|----------------|--------|-------|
-| MemoryRecorder | ✅      |       |
-| MemoryPlotter  | ✅      |       |
+## Current status
 
-During installation, **gpulink** also registers a command-line script accessible through the `gpulink` command.
+**⚠️!!! This project is under heavy development !!!⚠️**
+
+## Installation
+
+### Installation using PIP
+
+To install **gpulink** using the Python Package Manager (PIP) run:  
+```pip install gpulink```
+
+**gpulink** can also be used from source. Here perform the following steps to create a Python environment and to install
+the requirements:
+
+1. Create an environment: `python -m venv env`
+2. Activate the environment: `.\env\Scripts\Activate`
+3. Install requirements: `pip install -r requirements.txt`
+
+## Usage
+
+**gpulink** can be used as a library as well as from the command line.
 
 ## Library usage
 
-To integrate **gpulink** to a Python script, import `gpulink` and create an `NVContext`. This context manages the creation and
-destruction of the nvml session and provides several utility functions:
+To integrate **gpulink** to a Python script, import `gpulink` and create an `NVContext`. This context manages the
+creation and destruction of the nvml session and provides several query and utility functions (
+see [API example](example/example_api.py)):
 
 ```
 import gpulink as gpu
 
 with gpu.NVContext() as ctx:
+   print(f"Available GPUs: {ctx.gpu_names}")
+   memory_information = ctx.get_memory_info(ctx.gpus)
+   ...
 ```
 
-Every subsequent **gpulink** call (e.g. instantiation of a data recorder) must be made within this context. The context
-provides also additional information, i.e. about the numbers and names of compatible GPU devices:
+**gpulink** provides a [Recorder](gpulink/recorder.py) class for recording several GPU properties. An instance of this
+class mst be created using one of the factory methods, e.g.:
 
 ```
-    print(f"Available GPUs: {ctx.gpu_names}")
+    recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus)
+    recorder.start()
+    ... # Do some GPU stuff
+    recorder.stop(auto_join=True)
 ```
 
-**gpulink** provides data recorders (e.g. `MemoryRecorder`) for capturing and storing GPU stats and plotters (e.g.
-`MemoryPlotter`) for rendering these:
+One a recording is finished, the data can be accessed:
 
 ```
-    recorder = gpu.MemoryRecorder(ctx)
-    mem_info = recorder.record(store=False)
+recording = recording = recorder.get_recording()
+```
 
-    for _ in range(5):  # Record memory information over time
-        recorder.record()
+**gpulink** provides a [Plot](gpulink/plot.py) class for visualizing recordings
+using [matplotlib](https://matplotlib.org/):
 
-    records = recorder.get_records()
-    for rec in records:
-        print(f"Sampling rate: {rec.sampling_rate}")
-        print(f"Recording duration: {rec.duration}")
-        print(f"Number of records: {rec.len}")
-        print(rec)
-
-    graph = gpu.MemoryPlotter(records)
-    graph.draw_graph()
+```
+    from pathlib import Path
+    
+    plot = gpu.Plot(recording)
+    plot.plot(scale_y_axis=True)
+    plot.save(Path("memory.png"), scale_y_axis=True)
+    
+    figure, axis = plot.generate_graph()  # The generated Figure and Axis can also be accessed directly.
 ```
 
 ## Command-line usage
 
-```
-usage: gpu-link.py [-h] [-o OUTPUT]
+During installation, **gpulink** also registers a command-line script accessible through the `gpulink` command.
 
-GPU-Link memory tracing
+```
+usage: gpulink [-h] {sensors,record} ...
+
+GPU-Link: Monitor NVIDIA GPU status
+
+positional arguments:
+  {sensors,record}
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -o OUTPUT, --output OUTPUT
-                        Path to memory graph plot.
+  -h, --help        show this help message and exit
 ```
 
-### Example
-1. Run recording  
-(a) Installed from source: `python -m gpulink -o memory_consumption.png`  
-(b) Installed using pip: `gpulink -o memory_consumption.png`
-2. Stop recording *Ctrl+C*
-3. Plot is saved to `memory_consumption.png`.
+### Examples
 
-### Output
+- View GPU sensor status: `gpulink sensors`
+
 ```
-NVIDIA TITAN RTX[0] -> memory used: min=1729.236992[MB] / max=2315.79648[MB]
+╒════════╤═════════════════════╤═════════════╤═════════════════╤═══════════════╕
+│ GPU    │ Memory [MB]         │   Temp [°C] │   Fan speed [%] │ Clock [MHz]   │
+╞════════╪═════════════════════╪═════════════╪═════════════════╪═══════════════╡
+│ GPU[0] │ 1588 / 25769 (6.2%) │          34 │              41 │ Graph.: 173   │
+│        │                     │             │                 │ Memory: 403   │
+│        │                     │             │                 │ SM: 173       │
+│        │                     │             │                 │ Video: 539    │
+╘════════╧═════════════════════╧═════════════╧═════════════════╧═══════════════╛
+```
+
+- Record gpu memory information and save a plot as PNG: `gpulink record -o memory.png`
+
+#### View GPU sensor status
+
+##### Command:
+
+`gpulink sensors`
+
+### Output:
+
+```
+╒═════════════════════╤═════════════════╕
+│ Record duration [s] │ Frame rate [Hz] │
+├─────────────────────┼─────────────────┤
+│ 14.0294178          │ 235             │
+╘═════════════════════╧═════════════════╛
+╒═════╤══════════════════╤══════════════════════╕
+│ GPU │ Name             │ Memory used [MB]     │
+├─────┼──────────────────┼──────────────────────┤
+│ 0   │ NVIDIA TITAN RTX │ minimum: 1584.754688 │
+│     │                  │ maximum: 2204.585984 │
+╘═════╧══════════════════╧══════════════════════╛
 ```
 
 ![Memory consumption over time](./docs/mem_consumption.png)
