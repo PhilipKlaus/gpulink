@@ -1,7 +1,8 @@
 import time
 
 import gpulink as gpu
-from gpulink.recorder import Recorder, RecType
+from gpulink import Plot
+from gpulink.recorder import Recorder
 
 with gpu.NVContext() as ctx:
 
@@ -11,8 +12,9 @@ with gpu.NVContext() as ctx:
     recorder = Recorder.create_memory_recorder(ctx, ctx.gpus)
     recorder.start()
     time.sleep(3)  # Record for 3 seconds
-    recorder.stop()
-    recorder.join()
+    recorder.stop(auto_join=True)
 
     recording = recorder.get_recording()
     print(recording)
+
+    Plot(recording).plot(scale_y_axis=True)

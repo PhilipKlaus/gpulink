@@ -18,8 +18,12 @@ def main():
     parser_sensors.set_defaults(func=sensors)
 
     parser_record = subparser.add_parser("record", description="Record GPU properties")
-    parser_record.add_argument("-m", "--memory", help="Record used GPU memory (default)", action="store_true")
-    parser_record.add_argument("-o", "--output", type=Path, default=None, help="Path to memory graph plot")
+    parser_record.add_argument("-m", "--memory", help="Record amount of used GPU memory (default)", action="store_true")
+    parser_record.add_argument("-o", "--output", type=Path, default=None,
+                               help="Path to save the generated plot which shows the recorded GPU property over time.")
+    parser_record.add_argument("-p", "--plot",
+                               help="Show the generated plot which shows the recorded GPU property over time.",
+                               action="store_true")
     parser_record.set_defaults(func=record)
 
     args = parser.parse_args()

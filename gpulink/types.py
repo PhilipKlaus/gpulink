@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from math import floor
-from typing import List, Union
+from typing import List, Union, Iterator
 
 import numpy as np
 from tabulate import tabulate
@@ -16,7 +16,7 @@ class Unit:
 
 
 class RecType(Enum):
-    MEMORY_USED = ("Memory", Unit("MB", MB))
+    MEMORY_USED = ("Memory used", Unit("MB", MB))
 
 
 ###########################################################################
@@ -100,6 +100,30 @@ class GPURecording:
         metadata_table = self._create_metadata_table()
         data_table = self._create_data_table()
         return f"{metadata_table}\n{data_table}"
+
+
+##############################################################################
+
+@dataclass
+class SensorStatus:
+    gpus: List[int]
+    memory: List[GPUMemInfo]
+    temperature: List[GPUQuerySingleResult]
+    fan_speed: List[GPUQuerySingleResult]
+    clock: Iterator
+
+    def __str__(self):
+        header = ["GPU", "Memory [MB]", "Temp [°C]", "Fan speed [%]", "Clock [MHz]"]
+        table = [header]
+        for data in zip(self.gpus, self.memory, self.temperature, self.fan_speed, self.clock):
+            table.append([
+                f"GPU[{data[0]}]",
+                f"{int(data[1].used / MB)} / {int(data[1].total / MB)} ({(data[1].used / data[1].total) * 100:.1f}%)",
+                f"{data[2].value}",
+                f"{data[3].value}",
+                f"Graph.: {data[4][0].value}\nMemory: {data[4][1].value}\nSM: {data[4][2].value}\nVideo: {data[4][3].value} "
+            ])
+        return tabulate(table, headers='firstrow', tablefmt='fancy_grid')
 
 
 ##############################################################################
