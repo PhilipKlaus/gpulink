@@ -29,7 +29,7 @@ class Plot:
         ax.set_ylabel(f"{self._recording.type.value[0]} [{self._recording.type.value[1].name}]")
         ax.set_xlabel("Time [s]")
 
-    def generate_graph(self, scale_y_axis) -> Tuple[Figure, Axis]:
+    def generate_graph(self, scale_y_axis=False) -> Tuple[Figure, Axis]:
         """
         Generates the plot.
         :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
