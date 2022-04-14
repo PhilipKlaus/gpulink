@@ -30,7 +30,7 @@ install the requirements:
 
 To integrate **gpulink** to a Python script, import `gpulink` and create an `NVContext`. This context manages the
 creation and destruction of the nvml session and provides several query and utility functions (
-see [API example](https://github.com/PhilipKlaus/gpu-link/example/example_api.py)):
+see [API example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_api.py)):
 
 ```
 import gpulink as gpu
@@ -41,7 +41,7 @@ with gpu.NVContext() as ctx:
    ...
 ```
 
-**gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/gpulink/recorder.py) class for recording
+**gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/recorder.py) class for recording
 several GPU properties. An instance of this class must be created using one of the factory methods, e.g.:
 
 ```
@@ -57,7 +57,7 @@ Once a recording is finished, the data can be accessed:
 recording = recording = recorder.get_recording()
 ```
 
-**gpulink** provides a [Plot](https://github.com/PhilipKlaus/gpu-link/gpulink/plot.py) class for visualizing recordings
+**gpulink** provides a [Plot](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/plot.py) class for visualizing recordings
 using [matplotlib](https://matplotlib.org/):
 
 ```
@@ -89,7 +89,6 @@ optional arguments:
 ### Examples
 
 - View GPU sensor status: `gpulink sensors`
-
 ```
 ╒════════╤═════════════════════╤═════════════╤═════════════════╤═══════════════╕
 │ GPU    │ Memory [MB]         │   Temp [°C] │   Fan speed [%] │ Clock [MHz]   │
@@ -100,9 +99,7 @@ optional arguments:
 │        │                     │             │                 │ Video: 539    │
 ╘════════╧═════════════════════╧═════════════╧═════════════════╧═══════════════╛
 ```
-
 - Record gpu memory information and save a plot as PNG: `gpulink record -o memory.png`
-
 ```
 ╒═════════════════════╤═════════════════╕
 │ Record duration [s] │ Frame rate [Hz] │
@@ -116,5 +113,4 @@ optional arguments:
 │     │                  │ maximum: 2204.585984 │
 ╘═════╧══════════════════╧══════════════════════╛
 ```
-
-![Memory consumption over time](https://github.com/PhilipKlaus/gpu-link/docs/mem_consumption.png)
+![Memory consumption over time](https://github.com/PhilipKlaus/gpu-link/blob/main/docs/mem_consumption.png)

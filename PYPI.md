@@ -30,7 +30,7 @@ install the requirements:
 
 To integrate **gpulink** to a Python script, import `gpulink` and create an `NVContext`. This context manages the
 creation and destruction of the nvml session and provides several query and utility functions (
-see [API example](https://github.com/PhilipKlaus/gpu-link/example/example_api.py)):
+see [API example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_api.py)):
 
 ```
 import gpulink as gpu
@@ -41,7 +41,7 @@ with gpu.NVContext() as ctx:
    ...
 ```
 
-**gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/gpulink/recorder.py) class for recording
+**gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/recorder.py) class for recording
 several GPU properties. An instance of this class must be created using one of the factory methods, e.g.:
 
 ```
@@ -57,7 +57,7 @@ Once a recording is finished, the data can be accessed:
 recording = recording = recorder.get_recording()
 ```
 
-**gpulink** provides a [Plot](https://github.com/PhilipKlaus/gpu-link/gpulink/plot.py) class for visualizing recordings
+**gpulink** provides a [Plot](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/plot.py) class for visualizing recordings
 using [matplotlib](https://matplotlib.org/):
 
 ```
