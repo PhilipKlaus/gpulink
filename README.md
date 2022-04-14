@@ -15,8 +15,8 @@ the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-l
 To install **gpulink** using the Python Package Manager (PIP) run:  
 ```pip install gpulink```
 
-**gpulink** can also be used from source. Here perform the following steps to create a Python environment and to install
-the requirements:
+**gpulink** can also be used from source. For this, perform the following steps to create a Python environment and to
+install the requirements:
 
 1. Create an environment: `python -m venv env`
 2. Activate the environment: `.\env\Scripts\Activate`
@@ -24,13 +24,13 @@ the requirements:
 
 ## Usage
 
-**gpulink** can be used as a library as well as from the command line.
+**gpulink** can either be used from the command line or imported as a library.
 
 ## Library usage
 
 To integrate **gpulink** to a Python script, import `gpulink` and create an `NVContext`. This context manages the
 creation and destruction of the nvml session and provides several query and utility functions (
-see [API example](example/example_api.py)):
+see [API example](https://github.com/PhilipKlaus/gpu-link/example/example_api.py)):
 
 ```
 import gpulink as gpu
@@ -41,8 +41,8 @@ with gpu.NVContext() as ctx:
    ...
 ```
 
-**gpulink** provides a [Recorder](gpulink/recorder.py) class for recording several GPU properties. An instance of this
-class mst be created using one of the factory methods, e.g.:
+**gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/gpulink/recorder.py) class for recording
+several GPU properties. An instance of this class must be created using one of the factory methods, e.g.:
 
 ```
     recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus)
@@ -51,13 +51,13 @@ class mst be created using one of the factory methods, e.g.:
     recorder.stop(auto_join=True)
 ```
 
-One a recording is finished, the data can be accessed:
+Once a recording is finished, the data can be accessed:
 
 ```
 recording = recording = recorder.get_recording()
 ```
 
-**gpulink** provides a [Plot](gpulink/plot.py) class for visualizing recordings
+**gpulink** provides a [Plot](https://github.com/PhilipKlaus/gpu-link/gpulink/plot.py) class for visualizing recordings
 using [matplotlib](https://matplotlib.org/):
 
 ```
@@ -103,14 +103,6 @@ optional arguments:
 
 - Record gpu memory information and save a plot as PNG: `gpulink record -o memory.png`
 
-#### View GPU sensor status
-
-##### Command:
-
-`gpulink sensors`
-
-### Output:
-
 ```
 ╒═════════════════════╤═════════════════╕
 │ Record duration [s] │ Frame rate [Hz] │
@@ -125,4 +117,4 @@ optional arguments:
 ╘═════╧══════════════════╧══════════════════════╛
 ```
 
-![Memory consumption over time](./docs/mem_consumption.png)
+![Memory consumption over time](https://github.com/PhilipKlaus/gpu-link/docs/mem_consumption.png)
