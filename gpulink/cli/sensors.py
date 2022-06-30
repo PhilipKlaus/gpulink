@@ -3,7 +3,7 @@ import time
 
 from colorama import Cursor
 
-from gpulink import NVContext
+from gpulink import DeviceCtx
 from gpulink.cli.tools import get_spinner, busy_wait_for_interrupt
 from gpulink.stoppable_thread import StoppableThread
 from gpulink.types import TemperatureSensorType, ClockType, SensorStatus
@@ -14,7 +14,7 @@ def _set_cursor(x: int, y: int):
 
 
 class SensorWatcher(StoppableThread):
-    def __init__(self, ctx: NVContext):
+    def __init__(self, ctx: DeviceCtx):
         super().__init__()
         self._ctx = ctx
 
@@ -48,7 +48,7 @@ class SensorWatcher(StoppableThread):
 def sensors(args):
     """Print GPU sensor output"""
 
-    with NVContext() as ctx:
+    with DeviceCtx() as ctx:
         watcher = SensorWatcher(ctx)
 
         if args.watch:

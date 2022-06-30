@@ -1,6 +1,6 @@
 import gpulink as gpu
 
-with gpu.NVContext() as ctx:
+with gpu.DeviceCtx() as ctx:
     ctx.get_memory_info(ctx.gpus),
     ctx.get_fan_speed(ctx.gpus),
     ctx.get_temperature(ctx.gpus, gpu.TemperatureSensorType.GPU),

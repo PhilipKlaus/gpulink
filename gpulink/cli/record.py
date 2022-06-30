@@ -3,7 +3,7 @@ from typing import Optional
 
 from matplotlib import pyplot as plt
 
-from gpulink import NVContext, Recorder, Plot
+from gpulink import DeviceCtx, Recorder, Plot
 from gpulink.cli.tools import busy_wait_for_interrupt
 from gpulink.types import GPURecording
 
@@ -35,7 +35,7 @@ def record(args):
 
     _check_output_file_type(args.output)
 
-    with NVContext() as ctx:
+    with DeviceCtx() as ctx:
         recorder = Recorder.create_memory_recorder(ctx, ctx.gpus)
         busy_wait_for_interrupt(recorder, "[RECORDING]")
         recording = recorder.get_recording()

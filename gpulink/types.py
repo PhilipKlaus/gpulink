@@ -25,7 +25,7 @@ class RecType(Enum):
 ###########################################################################
 
 @dataclass
-class GPUQueryResult:
+class QueryResult:
     """
     Represents the base class for a single GPU query result.
     """
@@ -35,7 +35,7 @@ class GPUQueryResult:
 
 
 @dataclass
-class GPUQuerySingleResult(GPUQueryResult):
+class SimpleResult(QueryResult):
     """
     A GPUQueryResult containing only a single value.
     """
@@ -43,7 +43,7 @@ class GPUQuerySingleResult(GPUQueryResult):
 
 
 @dataclass
-class GPUMemInfo(GPUQueryResult):
+class MemInfo(QueryResult):
     """
     Stores the result of a nvmlDeviceGetMemoryInfo query.
     """
@@ -116,9 +116,9 @@ class SensorStatus:
     A container for storing several sensor status.
     """
     gpus: List[int]
-    memory: List[GPUMemInfo]
-    temperature: List[GPUQuerySingleResult]
-    fan_speed: List[GPUQuerySingleResult]
+    memory: List[MemInfo]
+    temperature: List[SimpleResult]
+    fan_speed: List[SimpleResult]
     clock: Iterator
 
     def __str__(self):

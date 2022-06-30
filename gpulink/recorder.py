@@ -3,7 +3,7 @@ from typing import List, Any, Callable, Tuple
 
 import numpy as np
 
-from gpulink import NVContext
+from gpulink import DeviceCtx
 from gpulink.stoppable_thread import StoppableThread
 from gpulink.types import GPURecording, RecType, PlotInfo
 
@@ -14,7 +14,7 @@ class Recorder(StoppableThread):
     """
     __create_key = object()
 
-    def __init__(self, create_key, ctx: NVContext, rec_type: RecType, gpus: List[int], *args, **kwargs):
+    def __init__(self, create_key, ctx: DeviceCtx, rec_type: RecType, gpus: List[int], *args, **kwargs):
         super().__init__()
         self._check_create_key(create_key)
         self._ctx = ctx
@@ -32,7 +32,7 @@ class Recorder(StoppableThread):
             raise RuntimeError("Recorder has to be instantiated using one of the factory methods!")
 
     @classmethod
-    def create_memory_recorder(cls, ctx: NVContext, gpus: List[int]):
+    def create_memory_recorder(cls, ctx: DeviceCtx, gpus: List[int]):
         """
         Factory method to instantiate a Recorder.
         :param ctx: A valid NVContext.

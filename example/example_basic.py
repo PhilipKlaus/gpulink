@@ -2,7 +2,7 @@ import time
 
 import gpulink as gpu
 
-with gpu.NVContext() as ctx:
+with gpu.DeviceCtx() as ctx:
 
     print(f"Available GPUs: {ctx.gpus}")
     print(f"Single Memory Info query: {ctx.get_memory_info(ctx.gpus)}")

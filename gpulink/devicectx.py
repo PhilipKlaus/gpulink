@@ -1,12 +1,22 @@
+from functools import wraps
 from typing import List, Optional
 
 from gpulink.devices.base_device import BaseDevice
 from gpulink.devices.nvml_device import LocalNvmlGpu
-from gpulink.types import GPUMemInfo, TemperatureThreshold, ClockId, \
-    ClockType, GPUQuerySingleResult, TemperatureSensorType
+from gpulink.types import MemInfo, TemperatureThreshold, ClockId, \
+    ClockType, SimpleResult, TemperatureSensorType
 
 
-class NVContext:
+def ctx_guard(fn):
+    @wraps(fn)
+    def guard(ref, *args, **kwargs):
+        if not ref.valid_ctx:
+            raise RuntimeError("Cannot execute query in an invalid NVContext")
+        return fn(ref, *args, **kwargs)
+    return guard
+
+
+class DeviceCtx:
     """
     A context for executing nvml queries.
     """
@@ -33,6 +43,7 @@ class NVContext:
         return self._valid_ctx
 
     @property
+    @ctx_guard
     def gpus(self) -> List[int]:
         """
         Queries the indices of all active GPUs
@@ -41,6 +52,7 @@ class NVContext:
         return self._device.get_gpu_ids()
 
     @property
+    @ctx_guard
     def gpu_names(self) -> List[str]:
         """
         Queries the names of all active GPUs
@@ -48,7 +60,8 @@ class NVContext:
         """
         return self._device.get_gpu_names()
 
-    def get_memory_info(self, gpus: Optional[List[int]]) -> List[GPUMemInfo]:
+    @ctx_guard
+    def get_memory_info(self, gpus: Optional[List[int]]) -> List[MemInfo]:
         """
         Queries the memory information [Bytes] using nvmlDeviceGetMemoryInfo.
         :param gpus: A list of indices from GPU to be queried.
@@ -56,7 +69,8 @@ class NVContext:
         """
         return self._device.get_memory_info(gpus)
 
-    def get_fan_speed(self, gpus: Optional[List[int]], fan=None) -> List[GPUQuerySingleResult]:
+    @ctx_guard
+    def get_fan_speed(self, gpus: Optional[List[int]], fan=None) -> List[SimpleResult]:
         """
         Queries the fan speed [%] using nvmlDeviceGetFanSpeed_v2 and nvmlDeviceGetFanSpeed.
         :param gpus: A list of indices from GPU to be queried.
@@ -65,8 +79,9 @@ class NVContext:
         """
         return self._device.get_fan_speed(gpus, fan)
 
+    @ctx_guard
     def get_temperature(self, gpus: Optional[List[int]], sensor_type: TemperatureSensorType) -> \
-            List[GPUQuerySingleResult]:
+            List[SimpleResult]:
         """
         Queries the temperature [°C] using nvmlDeviceGetTemperature.
         :param gpus: A list of indices from GPU to be queried.
@@ -75,8 +90,9 @@ class NVContext:
         """
         return self._device.get_temperature(gpus, sensor_type)
 
+    @ctx_guard
     def get_temperature_threshold(self, gpus: Optional[List[int]], threshold: TemperatureThreshold) -> \
-            List[GPUQuerySingleResult]:
+            List[SimpleResult]:
         """
         Queries the temperature threshold [°C].
         :param gpus: A list of indices from GPU to be queried.
@@ -85,8 +101,9 @@ class NVContext:
         """
         return self._device.get_temperature_threshold(gpus, threshold)
 
+    @ctx_guard
     def get_clock(self, gpus: Optional[List[int]], clock_type: ClockType, clock_id: ClockId = None) -> \
-            List[GPUQuerySingleResult]:
+            List[SimpleResult]:
         """
         Queries the clock speed [MHz].
         :param gpus: A list of indices from GPU to be queried.
@@ -96,7 +113,8 @@ class NVContext:
         """
         return self._device.get_clock(gpus, clock_type, clock_id)
 
-    def get_power_usage(self, gpus: Optional[List[int]]) -> List[GPUQuerySingleResult]:
+    @ctx_guard
+    def get_power_usage(self, gpus: Optional[List[int]]) -> List[SimpleResult]:
         """
         Queries the power usage [mW].
         :param gpus: A list of indices from GPU to be queried.
