@@ -7,7 +7,7 @@ from pynvml import nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGet
 
 from gpulink.devices.base_device import BaseDevice
 from gpulink.types import QueryResult, SimpleResult, ClockType, ClockId, MemInfo, TemperatureSensorType, \
-    TemperatureThreshold
+    TemperatureThreshold, Gpu, GpuSet
 
 
 class LocalNvmlGpu(BaseDevice):
@@ -54,11 +54,11 @@ class LocalNvmlGpu(BaseDevice):
     def shutdown(self) -> None:
         nvmlShutdown()
 
-    def get_gpu_ids(self) -> List[int]:
-        return self._device_ids
-
-    def get_gpu_names(self) -> List[str]:
-        return self._device_names
+    def get_gpus(self) -> GpuSet:
+        gpus = []
+        for id, name in zip(self._device_ids, self._device_names):
+            gpus.append(Gpu(id, name))
+        return GpuSet(gpus)
 
     def get_memory_info(self, gpus: Optional[List[int]]) -> List[MemInfo]:
         return cast(List[MemInfo], self._execute(nvmlDeviceGetMemoryInfo, MemInfo, gpus))

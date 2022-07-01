@@ -1,16 +1,10 @@
-import os
 import time
 
-from colorama import Cursor
-
 from gpulink import DeviceCtx
-from gpulink.cli.tools import get_spinner, busy_wait_for_interrupt
+from gpulink.cli.console import cls, set_cursor, get_spinner
+from gpulink.cli.tools import start_in_background
 from gpulink.stoppable_thread import StoppableThread
 from gpulink.types import TemperatureSensorType, ClockType, SensorStatus
-
-
-def _set_cursor(x: int, y: int):
-    return Cursor.POS(x, y)
 
 
 class SensorWatcher(StoppableThread):
@@ -33,16 +27,13 @@ class SensorWatcher(StoppableThread):
             )
         )
 
-    def _update_view(self, spinner: str):
-        print(f"{self.get_sensor_status()}\n[WATCHING] {spinner}{_set_cursor(1, 1)}", end="")
-
     def run(self) -> None:
-        os.system("cls")
+        cls()
         spinner = get_spinner()
         while not self.should_stop:
-            self._update_view(next(spinner))
+            print(f"{self.get_sensor_status()}\n[WATCHING] {next(spinner)}{set_cursor(1, 1)}", end="")
             time.sleep(0.5)
-        os.system("cls")
+        cls()
 
 
 def sensors(args):
@@ -52,6 +43,6 @@ def sensors(args):
         watcher = SensorWatcher(ctx)
 
         if args.watch:
-            busy_wait_for_interrupt(watcher)
+            start_in_background(watcher)
         else:
             print(watcher.get_sensor_status())

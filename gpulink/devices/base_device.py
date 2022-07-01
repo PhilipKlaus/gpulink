@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from gpulink.types import ClockType, ClockId, TemperatureThreshold, \
-    TemperatureSensorType, MemInfo, SimpleResult
+    TemperatureSensorType, MemInfo, SimpleResult, GpuSet
 
 
 class BaseDevice:
@@ -12,10 +12,7 @@ class BaseDevice:
     def shutdown(self) -> None:
         raise NotImplementedError()
 
-    def get_gpu_names(self) -> List[str]:
-        raise NotImplementedError()
-
-    def get_gpu_ids(self) -> List[int]:
+    def get_gpus(self) -> GpuSet:
         raise NotImplementedError()
 
     def get_memory_info(self, gpus: Optional[List[int]]) -> List[MemInfo]:

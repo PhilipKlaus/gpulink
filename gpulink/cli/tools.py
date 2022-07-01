@@ -1,23 +1,9 @@
-import itertools
 import signal
-import sys
 import time
 from typing import Optional, Callable
 
+from gpulink.cli.console import get_spinner, print_and_clear
 from gpulink.stoppable_thread import StoppableThread
-
-
-def get_spinner() -> itertools.cycle:
-    return itertools.cycle(['-', '\\', '|', '/'])
-
-
-def _print_and_clear(msg: str) -> None:
-    erase_list = ['\b' for _ in msg]
-    erase = "".join(erase_list)
-
-    sys.stdout.write(f"{msg}")
-    sys.stdout.flush()
-    sys.stdout.write(erase)
 
 
 class _CliInterrupt:
@@ -31,7 +17,7 @@ class _CliInterrupt:
             self._interrupt_task()
 
 
-def busy_wait_for_interrupt(thread: StoppableThread, waiting_msg: Optional[str] = None) -> None:
+def start_in_background(thread: StoppableThread, waiting_msg: Optional[str] = None) -> None:
     _ = _CliInterrupt(signal.SIGINT, lambda: thread.stop(auto_join=True))
 
     spinner = None
@@ -41,5 +27,5 @@ def busy_wait_for_interrupt(thread: StoppableThread, waiting_msg: Optional[str] 
     thread.start()
     while thread.is_alive():
         if waiting_msg:
-            _print_and_clear(f"{waiting_msg} {next(spinner)}")
+            print_and_clear(f"{waiting_msg} {next(spinner)}")
         time.sleep(0.1)

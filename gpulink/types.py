@@ -25,6 +25,31 @@ class RecType(Enum):
 ###########################################################################
 
 @dataclass
+class Gpu:
+    """
+    Represents the base class for a single GPU query result.
+    """
+    id: int
+    name: str
+
+
+class GpuSet:
+    def __init__(self, gpus: List[Gpu]):
+        self._gpus = gpus
+
+    def __getitem__(self, key):
+        return self._gpus[key]
+
+    @property
+    def ids(self) -> List[int]:
+        return [gpu.id for gpu in self._gpus]
+
+    @property
+    def names(self) -> List[str]:
+        return [gpu.name for gpu in self._gpus]
+
+
+@dataclass
 class QueryResult:
     """
     Represents the base class for a single GPU query result.
@@ -91,7 +116,7 @@ class GPURecording:
     def _create_metadata_table(self):
         return tabulate(
             [
-                ["Record duration [s]", "Frame rate [Hz]"],
+                ["Record duration [s]", "Sampling rate [Hz]"],
                 [self.duration, self.sampling_rate]
             ],
             tablefmt='fancy_grid')

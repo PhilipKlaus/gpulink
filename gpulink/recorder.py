@@ -4,19 +4,19 @@ from typing import List, Any, Callable, Tuple
 import numpy as np
 
 from gpulink import DeviceCtx
+from gpulink.factory import factory, make
 from gpulink.stoppable_thread import StoppableThread
 from gpulink.types import GPURecording, RecType, PlotInfo
 
 
+@factory
 class Recorder(StoppableThread):
     """
     A recorder for GPU properties.
     """
-    __create_key = object()
 
-    def __init__(self, create_key, ctx: DeviceCtx, rec_type: RecType, gpus: List[int], *args, **kwargs):
+    def __init__(self, ctx: DeviceCtx, rec_type: RecType, gpus: List[int], *args, **kwargs):
         super().__init__()
-        self._check_create_key(create_key)
         self._ctx = ctx
         self._gpus = gpus
         self._rec_type = rec_type
@@ -27,19 +27,16 @@ class Recorder(StoppableThread):
         self._data = [[] for _ in self._gpus]
 
     @classmethod
-    def _check_create_key(cls, create_key):
-        if create_key != Recorder.__create_key:
-            raise RuntimeError("Recorder has to be instantiated using one of the factory methods!")
-
-    @classmethod
-    def create_memory_recorder(cls, ctx: DeviceCtx, gpus: List[int]):
+    @make
+    def create_memory_recorder(cls, key: object, ctx: DeviceCtx, gpus: List[int]):
         """
         Factory method to instantiate a Recorder.
+        :param key: A factory key - must not be provided.
         :param ctx: A valid NVContext.
         :param gpus: The indices of the GPUs to be recorded.
         :return: An instance of Recorder.
         """
-        return Recorder(cls.__create_key, ctx, RecType.MEMORY_USED, gpus)
+        return Recorder(key, ctx, RecType.MEMORY_USED, gpus)
 
     def _get_ctx_function(self) -> Tuple[Callable, Any]:
         tmp = {
@@ -77,9 +74,8 @@ class Recorder(StoppableThread):
         return GPURecording(
             type=self._rec_type,
             gpus=self._gpus,
-            gpu_names=[self._ctx.gpu_names[idx] for idx in self._gpus],
+            gpu_names=[self._ctx.gpus[idx].name for idx in self._gpus],
             timestamps=[np.array(deepcopy(t)) for t in self._timestamps],
             data=[np.array(deepcopy(t)) for t in self._data],
             plot_info=self._create_plot_info()
         )
-

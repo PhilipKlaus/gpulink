@@ -4,7 +4,7 @@ from typing import List, Optional
 from gpulink.devices.base_device import BaseDevice
 from gpulink.devices.nvml_device import LocalNvmlGpu
 from gpulink.types import MemInfo, TemperatureThreshold, ClockId, \
-    ClockType, SimpleResult, TemperatureSensorType
+    ClockType, SimpleResult, TemperatureSensorType, GpuSet
 
 
 def ctx_guard(fn):
@@ -44,21 +44,12 @@ class DeviceCtx:
 
     @property
     @ctx_guard
-    def gpus(self) -> List[int]:
+    def gpus(self) -> GpuSet:
         """
         Queries the indices of all active GPUs
         :return: The indices of all active GPUs in a List
         """
-        return self._device.get_gpu_ids()
-
-    @property
-    @ctx_guard
-    def gpu_names(self) -> List[str]:
-        """
-        Queries the names of all active GPUs
-        :return: The names of all active GPUs in a list
-        """
-        return self._device.get_gpu_names()
+        return self._device.get_gpus()
 
     @ctx_guard
     def get_memory_info(self, gpus: Optional[List[int]]) -> List[MemInfo]:
