@@ -6,7 +6,7 @@ import numpy as np
 from gpulink import DeviceCtx
 from gpulink.factory import factory, make
 from gpulink.stoppable_thread import StoppableThread
-from gpulink.types import GPURecording, RecType, PlotInfo
+from gpulink.types import GPURecording, RecType, PlotInfo, GpuSet, TimeSeries
 
 
 @factory
@@ -73,9 +73,7 @@ class Recorder(StoppableThread):
         """
         return GPURecording(
             type=self._rec_type,
-            gpus=self._gpus,
-            gpu_names=[self._ctx.gpus[idx].name for idx in self._gpus],
-            timestamps=[np.array(deepcopy(t)) for t in self._timestamps],
-            data=[np.array(deepcopy(t)) for t in self._data],
+            gpus=GpuSet([self._ctx.gpus[idx] for idx in self._gpus]),
+            timeseries=TimeSeries(self._timestamps, self._data),
             plot_info=self._create_plot_info()
         )

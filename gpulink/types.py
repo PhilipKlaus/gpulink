@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from math import floor
@@ -37,8 +38,11 @@ class GpuSet:
     def __init__(self, gpus: List[Gpu]):
         self._gpus = gpus
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Gpu:
         return self._gpus[key]
+
+    def __len__(self) -> int:
+        return len(self._gpus)
 
     @property
     def ids(self) -> List[int]:
@@ -79,6 +83,38 @@ class MemInfo(QueryResult):
 
 ############################################################################
 
+class TimeSeries:
+
+    def __init__(self, timestamps: List[List[int]], data: List[List[Union[int, float]]]):
+        self._timestamps = [np.array(deepcopy(t)) for t in timestamps]
+        self._data = [np.array(deepcopy(t)) for t in data]
+
+    @property
+    def duration(self):
+        """
+        Calculates the recording duration in seconds.
+        :return: The recording duration in seconds
+        """
+        return (self._timestamps[-1][-1] - self._timestamps[0][0]) / SEC
+
+    @property
+    def sampling_rate(self):
+        """
+        Calculates the average sampling rate (nvml calls per second).
+        :return: The average sampling rate.
+        """
+        amount_records = (len(self._data) * self._data[0].shape[0])
+        return floor(amount_records / self.duration)
+
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def timestamps(self):
+        return self._timestamps
+
+
 @dataclass
 class PlotInfo:
     max_values: List[Union[int, float]]
@@ -89,42 +125,24 @@ class GPURecording:
     """
     A container for storing a gpu recording
     """
-    type: RecType  # The recording type
-    gpus: List[int]  # List of GPU ids
-    gpu_names: List[str]  # List of GPU names
-    timestamps: List[np.ndarray]  # List of numpy arrays of recording timestamps
-    data: List[np.ndarray]  # List of numpy arrays of recording data
+    type: RecType  # The type of recording
+    gpus: GpuSet  # The recorded Gpu devices
+    timeseries: TimeSeries  # The recorded time series data
     plot_info: PlotInfo  # Additional information for plotting
-
-    @property
-    def duration(self):
-        """
-        Calculates the recording duration in seconds.
-        :return: The recording duration in seconds
-        """
-        return (self.timestamps[-1][-1] - self.timestamps[0][0]) / SEC
-
-    @property
-    def sampling_rate(self):
-        """
-        Calculates the average sampling rate (nvml calls per second).
-        :return: The average sampling rate.
-        """
-        amount_records = (len(self.gpus) * self.timestamps[0].shape[0])
-        return floor(amount_records / self.duration)
 
     def _create_metadata_table(self):
         return tabulate(
             [
                 ["Record duration [s]", "Sampling rate [Hz]"],
-                [self.duration, self.sampling_rate]
+                [self.timeseries.duration, self.timeseries.sampling_rate]
             ],
             tablefmt='fancy_grid')
 
     def _create_data_table(self):
         table = [["GPU", "Name", f"{self.type.value[0]} [{self.type.value[1].name}]"]]
-        for idx, name in zip(self.gpus, self.gpu_names):
-            table.append([idx, name, f"minimum: {np.min(self.data) / MB}\nmaximum: {np.max(self.data) / MB}"])
+        for gpu in self.gpus:
+            table.append([gpu.id, gpu.name,
+                          f"minimum: {np.min(self.timeseries.data) / MB}\nmaximum: {np.max(self.timeseries.data) / MB}"])
         return tabulate(table, tablefmt='fancy_grid')
 
     def __str__(self):

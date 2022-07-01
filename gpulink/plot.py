@@ -43,11 +43,11 @@ class Plot:
         fig, ax = plt.subplots()
 
         for gpu in self._recording.gpus:
-            timestamps = self._recording.timestamps[gpu]
-            data = self._recording.data[gpu]
-            max_value = self._recording.plot_info.max_values[gpu]
-            gpu_name = self._recording.gpu_names[gpu]
-            idx = self._recording.gpus[gpu]
+            timestamps = self._recording.timeseries.timestamps[gpu.id]
+            data = self._recording.timeseries.data[gpu.id]
+            max_value = self._recording.plot_info.max_values[gpu.id]
+            gpu_name = gpu.name
+            idx = self._recording.gpus[gpu.id]
 
             if timestamps.shape[0] == 0:
                 raise RuntimeError("Recording data is empty")
