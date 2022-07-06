@@ -44,6 +44,9 @@ class GpuSet:
     def __len__(self) -> int:
         return len(self._gpus)
 
+    def __eq__(self, other):
+        return self.ids == other.ids and self.names == other.names
+
     @property
     def ids(self) -> List[int]:
         return [gpu.id for gpu in self._gpus]
