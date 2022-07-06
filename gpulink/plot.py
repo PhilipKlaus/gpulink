@@ -46,8 +46,6 @@ class Plot:
             timestamps = self._recording.timeseries.timestamps[gpu.id]
             data = self._recording.timeseries.data[gpu.id]
             max_value = self._recording.plot_info.max_values[gpu.id]
-            gpu_name = gpu.name
-            idx = self._recording.gpus[gpu.id]
 
             if timestamps.shape[0] == 0:
                 raise RuntimeError("Recording data is empty")
@@ -56,7 +54,7 @@ class Plot:
             x_axis = (timestamps - timestamps[0]) / SEC
             y_axis = data / unit_divider
 
-            ax.plot(x_axis, y_axis, label=f"{gpu_name} [{idx}]")
+            ax.plot(x_axis, y_axis, label=f"{gpu.name} [{gpu.id}]")
 
         if not scale_y_axis:
             plt.ylim([0, max_val / unit_divider])

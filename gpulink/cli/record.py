@@ -1,11 +1,13 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Callable, List, Union
 
 from matplotlib import pyplot as plt
 
 from gpulink import DeviceCtx, Plot, Recorder
 from gpulink.cli.tools import start_in_background
-from gpulink.types import GPURecording
+from gpulink.factory import factory, make
+from gpulink.stoppable_thread import StoppableThread
+from gpulink.types import GPURecording, QueryResult
 
 
 def _check_output_file_type(output_path: Path):
@@ -30,6 +32,40 @@ def _display_plot(recording: GPURecording, plot: bool):
         p.plot(scale_y_axis=True)
 
 
+"""
+@factory
+class Recorder(StoppableThread):
+
+    def __init__(self, cmd: Callable[[], List[QueryResult]], filter: Callable[[QueryResult], Union[int, float, str]]):
+        super().__init__()
+        self._cmd = cmd
+        self._filter = filter
+        self._data = []
+
+    @classmethod
+    @make
+    def create_memory_recorder(cls, key, ctx: DeviceCtx, gpus: List[int]):
+        return Recorder(
+            key,
+            cmd=lambda: ctx.get_memory_info(gpus),
+            filter=lambda res: res.used
+        )
+
+    def fetch_data(self):
+        data = []
+        for result in self._cmd():
+            data.append(self._filter(result))
+        return data
+
+    def run(self):
+        while not self.should_stop:
+            data.append(self.fetch_data())
+
+    def get_recording(self):
+        return None
+"""
+
+
 def record(args):
     """Record GPU properties"""
 
@@ -40,7 +76,8 @@ def record(args):
         start_in_background(recorder, "[RECORDING]")
         recording = recorder.get_recording()
 
+    print("")
     print(recording)
 
-    _store_records(recording, args.output)
-    _display_plot(recording, args.plot)
+    # _store_records(recording, args.output)
+    # _display_plot(recording, args.plot)

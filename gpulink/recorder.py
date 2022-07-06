@@ -1,7 +1,4 @@
-from copy import deepcopy
 from typing import List, Any, Callable, Tuple
-
-import numpy as np
 
 from gpulink import DeviceCtx
 from gpulink.factory import factory, make
