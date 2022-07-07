@@ -3,7 +3,7 @@ from setuptools import setup
 with open("PYPI.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-tests_require=['pytest', 'pytest-mock']
+tests_require = ['pytest', 'pytest-mock', 'pytest-cov']
 
 setup(
     name="gpulink",

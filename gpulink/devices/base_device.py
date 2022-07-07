@@ -15,21 +15,21 @@ class BaseDevice:
     def get_gpus(self) -> GpuSet:
         raise NotImplementedError()
 
-    def get_memory_info(self, gpus: Optional[List[int]]) -> List[MemInfo]:
+    def get_memory_info(self, gpus: Optional[List[int]] = None) -> List[MemInfo]:
         raise NotImplementedError()
 
-    def get_fan_speed(self, gpus: Optional[List[int]], fan=None) -> List[SimpleResult]:
+    def get_fan_speed(self, fan: Optional[int] = None, gpus: Optional[List[int]] = None) -> List[SimpleResult]:
         raise NotImplementedError()
 
-    def get_temperature(self, gpus: Optional[List[int]], sensor_type: TemperatureSensorType) -> \
+    def get_temperature(self, sensor_type: TemperatureSensorType, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         raise NotImplementedError()
 
-    def get_temperature_threshold(self, gpus: Optional[List[int]], threshold: TemperatureThreshold) -> \
+    def get_temperature_threshold(self, threshold: TemperatureThreshold, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         raise NotImplementedError()
 
-    def get_clock(self, gpus: Optional[List[int]], clock_type: ClockType, clock_id: ClockId = None) -> \
+    def get_clock(self, clock_type: ClockType, clock_id: ClockId = None, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         raise NotImplementedError()
 

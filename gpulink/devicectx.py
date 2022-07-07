@@ -13,6 +13,7 @@ def ctx_guard(fn):
         if not ref.valid_ctx:
             raise RuntimeError("Cannot execute query in an invalid NVContext")
         return fn(ref, *args, **kwargs)
+
     return guard
 
 
@@ -52,7 +53,7 @@ class DeviceCtx:
         return self._device.get_gpus()
 
     @ctx_guard
-    def get_memory_info(self, gpus: Optional[List[int]]) -> List[MemInfo]:
+    def get_memory_info(self, gpus: Optional[List[int]] = None) -> List[MemInfo]:
         """
         Queries the memory information [Bytes] using nvmlDeviceGetMemoryInfo.
         :param gpus: A list of indices from GPU to be queried.
@@ -61,28 +62,28 @@ class DeviceCtx:
         return self._device.get_memory_info(gpus)
 
     @ctx_guard
-    def get_fan_speed(self, gpus: Optional[List[int]], fan=None) -> List[SimpleResult]:
+    def get_fan_speed(self, fan: Optional[int] = None, gpus: Optional[List[int]] = None) -> List[SimpleResult]:
         """
         Queries the fan speed [%] using nvmlDeviceGetFanSpeed_v2 and nvmlDeviceGetFanSpeed.
-        :param gpus: A list of indices from GPU to be queried.
         :param fan: The index of the fan to be queried.
+        :param gpus: An optional list of GPU indices to be queried.
         :return: A list GPUQuerySingleResult.
         """
-        return self._device.get_fan_speed(gpus, fan)
+        return self._device.get_fan_speed(fan, gpus)
 
     @ctx_guard
-    def get_temperature(self, gpus: Optional[List[int]], sensor_type: TemperatureSensorType) -> \
+    def get_temperature(self, sensor_type: TemperatureSensorType, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         """
         Queries the temperature [°C] using nvmlDeviceGetTemperature.
-        :param gpus: A list of indices from GPU to be queried.
         :param sensor_type:The type of the actual temperature sensor to be queried.
+        :param gpus: An optional list of GPU indices to be queried.
         :return: A List of GPUQuerySingleResult.
         """
-        return self._device.get_temperature(gpus, sensor_type)
+        return self._device.get_temperature(sensor_type, gpus)
 
     @ctx_guard
-    def get_temperature_threshold(self, gpus: Optional[List[int]], threshold: TemperatureThreshold) -> \
+    def get_temperature_threshold(self, threshold: TemperatureThreshold, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         """
         Queries the temperature threshold [°C].
@@ -90,10 +91,10 @@ class DeviceCtx:
         :param threshold: The type of threshold to be queried.
         :return: A List of GPUQuerySingleResult.
         """
-        return self._device.get_temperature_threshold(gpus, threshold)
+        return self._device.get_temperature_threshold(threshold, gpus)
 
     @ctx_guard
-    def get_clock(self, gpus: Optional[List[int]], clock_type: ClockType, clock_id: ClockId = None) -> \
+    def get_clock(self, clock_type: ClockType, clock_id: ClockId = None, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         """
         Queries the clock speed [MHz].
@@ -102,7 +103,7 @@ class DeviceCtx:
         :param clock_id: The id of the clock to be queried.
         :return: A List of GPUQuerySingleResult.
         """
-        return self._device.get_clock(gpus, clock_type, clock_id)
+        return self._device.get_clock(clock_type, clock_id, gpus)
 
     @ctx_guard
     def get_power_usage(self, gpus: Optional[List[int]]) -> List[SimpleResult]:

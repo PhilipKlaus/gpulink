@@ -60,30 +60,30 @@ class LocalNvmlGpu(BaseDevice):
             gpus.append(Gpu(id, name))
         return GpuSet(gpus)
 
-    def get_memory_info(self, gpus: Optional[List[int]]) -> List[MemInfo]:
+    def get_memory_info(self, gpus: Optional[List[int]] = None) -> List[MemInfo]:
         return cast(List[MemInfo], self._execute(nvmlDeviceGetMemoryInfo, MemInfo, gpus))
 
-    def get_fan_speed(self, gpus: Optional[List[int]], fan=None) -> List[SimpleResult]:
+    def get_fan_speed(self, fan: Optional[int] = None, gpus: Optional[List[int]] = None) -> List[SimpleResult]:
         if fan is not None:
-            return cast(List[SimpleResult], self._execute(nvmlDeviceGetFanSpeed_v2, SimpleResult, gpus))
+            return cast(List[SimpleResult], self._execute(nvmlDeviceGetFanSpeed_v2, SimpleResult, gpus, fan))
         else:
             return cast(List[SimpleResult], self._execute(nvmlDeviceGetFanSpeed, SimpleResult, gpus))
 
-    def get_temperature(self, gpus: Optional[List[int]], sensor_type: TemperatureSensorType) -> \
+    def get_temperature(self, sensor_type: TemperatureSensorType, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         return cast(List[SimpleResult],
                     self._execute(nvmlDeviceGetTemperature, SimpleResult, gpus, sensor_type.value))
 
-    def get_temperature_threshold(self, gpus: Optional[List[int]], threshold: TemperatureThreshold) -> \
+    def get_temperature_threshold(self, threshold: TemperatureThreshold, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         return cast(List[SimpleResult],
                     self._execute(nvmlDeviceGetTemperatureThreshold, SimpleResult, gpus, threshold.value))
 
-    def get_clock(self, gpus: Optional[List[int]], clock_type: ClockType, clock_id: ClockId = None) -> \
+    def get_clock(self, clock_type: ClockType, clock_id: ClockId = None, gpus: Optional[List[int]] = None) -> \
             List[SimpleResult]:
         if clock_id is not None:
             return cast(List[SimpleResult],
-                        self._execute(nvmlDeviceGetClock, SimpleResult, gpus, clock_type, clock_id.value))
+                        self._execute(nvmlDeviceGetClock, SimpleResult, gpus, clock_type.value, clock_id.value))
         else:
             return cast(List[SimpleResult],
                         self._execute(nvmlDeviceGetClockInfo, SimpleResult, gpus, clock_type.value))
