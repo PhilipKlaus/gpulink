@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from gpulink.devices.base_device import BaseDevice
 from gpulink.devices.nvml_device import LocalNvmlGpu
@@ -22,7 +22,7 @@ class DeviceCtx:
     A context for executing nvml queries.
     """
 
-    def __init__(self, device_type: type[BaseDevice] = LocalNvmlGpu):
+    def __init__(self, device_type: Type[BaseDevice] = LocalNvmlGpu):
         self._valid_ctx = False
         self._device = device_type()
 

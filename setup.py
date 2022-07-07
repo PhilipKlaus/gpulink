@@ -1,5 +1,10 @@
+import sys
+
 from setuptools import setup
 
+if sys.version_info < (3, 7):
+    sys.exit('Sorry, Python < 3.7 is not supported')
+    
 with open("PYPI.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
