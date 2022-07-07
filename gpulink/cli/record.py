@@ -1,13 +1,11 @@
 from pathlib import Path
-from typing import Optional, Callable, List, Union
+from typing import Optional
 
 from matplotlib import pyplot as plt
 
 from gpulink import DeviceCtx, Plot, Recorder
 from gpulink.cli.tools import start_in_background
-from gpulink.factory import factory, make
-from gpulink.stoppable_thread import StoppableThread
-from gpulink.types import GPURecording, QueryResult
+from gpulink.types import GPURecording
 
 
 def _check_output_file_type(output_path: Path):

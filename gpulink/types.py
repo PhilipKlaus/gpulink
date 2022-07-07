@@ -144,8 +144,12 @@ class GPURecording:
     def _create_data_table(self):
         table = [["GPU", "Name", f"{self.type.value[0]} [{self.type.value[1].name}]"]]
         for gpu in self.gpus:
-            table.append([gpu.id, gpu.name,
-                          f"minimum: {np.min(self.timeseries.data) / MB}\nmaximum: {np.max(self.timeseries.data) / MB}"])
+            table.append(
+                [gpu.id,
+                 gpu.name,
+                 f"minimum: {np.min(self.timeseries.data) / MB}\nmaximum: {np.max(self.timeseries.data) / MB}"
+                 ]
+            )
         return tabulate(table, tablefmt='fancy_grid')
 
     def __str__(self):
@@ -176,7 +180,8 @@ class SensorStatus:
                 f"{int(data[1].used / MB)} / {int(data[1].total / MB)} ({(data[1].used / data[1].total) * 100:.1f}%)",
                 f"{data[2].value}",
                 f"{data[3].value}",
-                f"Graph.: {data[4][0].value}\nMemory: {data[4][1].value}\nSM: {data[4][2].value}\nVideo: {data[4][3].value} "
+                f"Graph.: {data[4][0].value}\nMemory: {data[4][1].value}\n"
+                f"SM: {data[4][2].value}\nVideo: {data[4][3].value} "
             ])
         return tabulate(table, headers='firstrow', tablefmt='fancy_grid')
 
