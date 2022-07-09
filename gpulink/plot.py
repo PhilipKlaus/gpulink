@@ -24,9 +24,9 @@ class Plot:
         self._recording = recording
 
     def _describe_plot(self, ax):
-        ax.set_title(f"GPULink Recording: {self._recording.type.value[0]}")
+        ax.set_title(f"GPULink Recording: {self._recording.rec_type.value[0]}")
         ax.legend(loc="upper left")
-        ax.set_ylabel(f"{self._recording.type.value[0]} [{self._recording.type.value[1].name}]")
+        ax.set_ylabel(f"{self._recording.rec_type.value[0]} [{self._recording.rec_type.value[1].name}]")
         ax.set_xlabel("Time [s]")
 
     def generate_graph(self, scale_y_axis=False) -> Tuple[Figure, Axis]:
@@ -37,7 +37,7 @@ class Plot:
         :return: A Tuple containing the generated Figure and Axis.
         """
         _clean_matplotlib()
-        unit_divider = self._recording.type.value[1].value
+        unit_divider = self._recording.rec_type.value[1].value
         max_val = 0
 
         fig, ax = plt.subplots()

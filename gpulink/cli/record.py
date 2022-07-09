@@ -30,40 +30,6 @@ def _display_plot(recording: GPURecording, plot: bool):
         p.plot(scale_y_axis=True)
 
 
-"""
-@factory
-class Recorder(StoppableThread):
-
-    def __init__(self, cmd: Callable[[], List[QueryResult]], filter: Callable[[QueryResult], Union[int, float, str]]):
-        super().__init__()
-        self._cmd = cmd
-        self._filter = filter
-        self._data = []
-
-    @classmethod
-    @make
-    def create_memory_recorder(cls, key, ctx: DeviceCtx, gpus: List[int]):
-        return Recorder(
-            key,
-            cmd=lambda: ctx.get_memory_info(gpus),
-            filter=lambda res: res.used
-        )
-
-    def fetch_data(self):
-        data = []
-        for result in self._cmd():
-            data.append(self._filter(result))
-        return data
-
-    def run(self):
-        while not self.should_stop:
-            data.append(self.fetch_data())
-
-    def get_recording(self):
-        return None
-"""
-
-
 def record(args):
     """Record GPU properties"""
 

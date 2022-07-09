@@ -1,13 +1,11 @@
-from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
-from math import floor
 from typing import List, Union, Iterator
 
 import numpy as np
 from tabulate import tabulate
 
-from gpulink.consts import MB, SEC
+from gpulink.consts import MB
 
 
 @dataclass
@@ -86,36 +84,23 @@ class MemInfo(QueryResult):
 
 ############################################################################
 
+@dataclass
 class TimeSeries:
+    def __init__(self, timestamps=[], data=[]):
+        self._timestamps = timestamps
+        self._data = data
 
-    def __init__(self, timestamps: List[List[int]], data: List[List[Union[int, float]]]):
-        self._timestamps = [np.array(deepcopy(t)) for t in timestamps]
-        self._data = [np.array(deepcopy(t)) for t in data]
-
-    @property
-    def duration(self):
-        """
-        Calculates the recording duration in seconds.
-        :return: The recording duration in seconds
-        """
-        return (self._timestamps[-1][-1] - self._timestamps[0][0]) / SEC
-
-    @property
-    def sampling_rate(self):
-        """
-        Calculates the average sampling rate (nvml calls per second).
-        :return: The average sampling rate.
-        """
-        amount_records = (len(self._data) * self._data[0].shape[0])
-        return floor(amount_records / self.duration)
-
-    @property
-    def data(self):
-        return self._data
+    def add_record(self, timestamp, data):
+        self._timestamps.append(timestamp)
+        self._data.append(data)
 
     @property
     def timestamps(self):
         return self._timestamps
+
+    @property
+    def data(self):
+        return self._data
 
 
 @dataclass
@@ -128,9 +113,9 @@ class GPURecording:
     """
     A container for storing a gpu recording
     """
-    type: RecType  # The type of recording
+    rec_type: RecType  # The type of recording
     gpus: GpuSet  # The recorded Gpu devices
-    timeseries: TimeSeries  # The recorded time series data
+    timeseries: List[TimeSeries]  # The recorded time series data
     plot_info: PlotInfo  # Additional information for plotting
 
     def _create_metadata_table(self):
@@ -142,7 +127,7 @@ class GPURecording:
             tablefmt='fancy_grid')
 
     def _create_data_table(self):
-        table = [["GPU", "Name", f"{self.type.value[0]} [{self.type.value[1].name}]"]]
+        table = [["GPU", "Name", f"{self.rec_type.value[0]} [{self.rec_type.value[1].name}]"]]
         for gpu in self.gpus:
             table.append(
                 [gpu.id,
