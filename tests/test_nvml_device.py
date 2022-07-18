@@ -7,8 +7,10 @@ from collections import namedtuple
 import pytest
 
 from gpulink import DeviceCtx
-from gpulink.gpu_types import MemInfo, TemperatureThreshold, TemperatureSensorType, SimpleResult, Gpu, GpuSet, ClockType, \
+from gpulink.devices.nvml_defines import TemperatureThreshold, TemperatureSensorType, ClockType, \
     ClockId
+from gpulink.devices.query import SimpleResult, MemInfo
+from gpulink.devices.gpu import Gpu, GpuSet
 
 _GB = int(1e9)
 

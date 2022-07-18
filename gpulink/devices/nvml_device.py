@@ -6,8 +6,10 @@ from pynvml import nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGet
     nvmlDeviceGetMemoryInfo, nvmlDeviceGetFanSpeed_v2, nvmlDeviceGetFanSpeed, nvmlInit, nvmlShutdown
 
 from gpulink.devices.base_device import BaseDevice
-from gpulink.gpu_types import QueryResult, SimpleResult, ClockType, ClockId, MemInfo, TemperatureSensorType, \
-    TemperatureThreshold, Gpu, GpuSet
+from gpulink.devices.nvml_defines import ClockType, ClockId, TemperatureSensorType, \
+    TemperatureThreshold
+from gpulink.devices.query import QueryResult, SimpleResult, MemInfo
+from gpulink.devices.gpu import Gpu, GpuSet
 
 
 class LocalNvmlGpu(BaseDevice):

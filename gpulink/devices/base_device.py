@@ -1,7 +1,9 @@
 from typing import Optional, List
 
-from gpulink.gpu_types import ClockType, ClockId, TemperatureThreshold, \
-    TemperatureSensorType, MemInfo, SimpleResult, GpuSet
+from gpulink.devices.nvml_defines import ClockType, ClockId, TemperatureThreshold, \
+    TemperatureSensorType
+from gpulink.devices.query import SimpleResult, MemInfo
+from gpulink.devices.gpu import GpuSet
 
 
 class BaseDevice:

@@ -5,8 +5,9 @@ from matplotlib import pyplot as plt
 from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
-from .consts import SEC
-from .gpu_types import GPURecording, PlotOptions
+from gpulink.consts import SEC
+from gpulink.record.recording import Recording
+from .plot_options import PlotOptions
 
 
 def _clean_matplotlib():
@@ -20,7 +21,7 @@ class Plot:
     Plots recorded GPU properties over time.
     """
 
-    def __init__(self, recording: GPURecording):
+    def __init__(self, recording: Recording):
         self._recording = recording
         self._patch_plot_options()
 
@@ -71,22 +72,18 @@ class Plot:
         self._describe_plot(ax)
         return fig, ax
 
-    def save(self, img_path: Path, scale_y_axis=False) -> None:
+    def save(self, img_path: Path) -> None:
         """
         Generates and saves a Plot as an image.
         :param img_path: The path to the image file.
-        :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
-        means that the y-axis is scaled to the actual consumed memory and not to the maximum available memory.
         """
-        self.generate_graph(scale_y_axis)
+        self.generate_graph()
         plt.savefig(img_path.as_posix())
 
-    def plot(self, scale_y_axis=False) -> None:
+    def plot(self) -> None:
         """
         Generates and display a Plot.
-        :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
-        means that the y-axis is scaled to the actual consumed memory and not to the maximum available memory.
         """
-        fig, _ = self.generate_graph(scale_y_axis)
+        fig, _ = self.generate_graph()
         fig.canvas.manager.set_window_title("GPULink")
         plt.show()

@@ -3,7 +3,7 @@ import time
 from typing import Optional, Callable
 
 from gpulink.cli.console import get_spinner, print_and_clear, cls
-from gpulink.stoppable_thread import StoppableThread
+from gpulink.threading.stoppable_thread import StoppableThread
 
 
 class _CliInterrupt:

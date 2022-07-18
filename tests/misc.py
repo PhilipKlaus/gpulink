@@ -1,8 +1,10 @@
 from typing import Optional, List
 
 from gpulink.devices.base_device import BaseDevice
-from gpulink.gpu_types import GpuSet, Gpu, MemInfo, SimpleResult, TemperatureThreshold, ClockId, ClockType, \
+from gpulink.devices.nvml_defines import TemperatureThreshold, ClockId, ClockType, \
     TemperatureSensorType
+from gpulink.devices.query import SimpleResult, MemInfo
+from gpulink.devices.gpu import Gpu, GpuSet
 
 TEST_GB = int(1e9)
 TEST_FAN_SPEED_PCT = 100

@@ -4,7 +4,8 @@ import pytest
 
 from gpulink import DeviceCtx, Recorder
 from gpulink.consts import MB
-from gpulink.gpu_types import TimeSeries, PlotOptions
+from gpulink.record.timeseries import TimeSeries
+from gpulink.plotting.plot_options import PlotOptions
 from tests.misc import DeviceMock, TEST_GB
 
 
@@ -16,7 +17,7 @@ def device_ctx():
 def test_get_record(device_ctx):
     with device_ctx as ctx:
         rec = Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
-        assert rec.get_record() == ([0, 0], [TEST_GB // 2, TEST_GB // 2])
+        assert rec._get_record() == ([0, 0], [TEST_GB // 2, TEST_GB // 2])
 
 
 def test_fetch_and_return_data(device_ctx):
@@ -24,7 +25,7 @@ def test_fetch_and_return_data(device_ctx):
         rec = Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
 
         for i in range(3):
-            rec.fetch_and_store()
+            rec._fetch_and_store()
 
         data = rec.get_recording()
         assert data.gpus == ctx.gpus

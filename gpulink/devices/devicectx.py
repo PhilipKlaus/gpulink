@@ -3,8 +3,10 @@ from typing import List, Optional, Type
 
 from gpulink.devices.base_device import BaseDevice
 from gpulink.devices.nvml_device import LocalNvmlGpu
-from gpulink.gpu_types import MemInfo, TemperatureThreshold, ClockId, \
-    ClockType, SimpleResult, TemperatureSensorType, GpuSet
+from gpulink.devices.nvml_defines import TemperatureThreshold, ClockId, \
+    ClockType, TemperatureSensorType
+from gpulink.devices.query import SimpleResult, MemInfo
+from gpulink.devices.gpu import GpuSet
 
 
 def ctx_guard(fn):
@@ -19,7 +21,7 @@ def ctx_guard(fn):
 
 class DeviceCtx:
     """
-    A context for executing nvml queries.
+    A context for fetching device data.
     """
 
     def __init__(self, device: Type[BaseDevice] = LocalNvmlGpu):

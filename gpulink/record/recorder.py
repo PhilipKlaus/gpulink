@@ -2,8 +2,12 @@ from typing import List, Callable, Tuple, Union, Optional
 
 from gpulink import DeviceCtx
 from gpulink.consts import MB
-from gpulink.gpu_types import GPURecording, GpuSet, TimeSeries, QueryResult, PlotOptions
-from gpulink.stoppable_thread import StoppableThread
+from gpulink.devices.gpu import GpuSet
+from gpulink.plotting.plot_options import PlotOptions
+from gpulink.devices.query import QueryResult
+from gpulink.record.recording import Recording
+from gpulink.threading.stoppable_thread import StoppableThread
+from gpulink.record.timeseries import TimeSeries
 
 
 class Recorder(StoppableThread):
@@ -25,7 +29,7 @@ class Recorder(StoppableThread):
 
         self._timeseries = [TimeSeries() for _ in gpus]
 
-    def get_record(self) -> Tuple[List, List[int]]:
+    def _get_record(self) -> Tuple[List, List[int]]:
         data = []
         timestamps = []
         for result in self._cmd(self._ctx):
@@ -33,17 +37,17 @@ class Recorder(StoppableThread):
             timestamps.append(result.timestamp)
         return timestamps, data
 
-    def fetch_and_store(self):
-        timestamps, data = self.get_record()
+    def _fetch_and_store(self):
+        timestamps, data = self._get_record()
         for idx, record in enumerate(zip(timestamps, data)):
             self._timeseries[idx].add_record(record[0], record[1])
 
     def run(self):
         while not self.should_stop:
-            self.fetch_and_store()
+            self._fetch_and_store()
 
-    def get_recording(self) -> GPURecording:
-        return GPURecording(
+    def get_recording(self) -> Recording:
+        return Recording(
             gpus=GpuSet([self._ctx.gpus[idx] for idx in self._gpus]),
             timeseries=self._timeseries,
             plot_options=self._plot_options
