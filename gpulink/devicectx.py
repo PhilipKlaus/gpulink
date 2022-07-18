@@ -22,9 +22,9 @@ class DeviceCtx:
     A context for executing nvml queries.
     """
 
-    def __init__(self, device_type: Type[BaseDevice] = LocalNvmlGpu):
+    def __init__(self, device: Type[BaseDevice] = LocalNvmlGpu):
         self._valid_ctx = False
-        self._device = device_type()
+        self._device = device()
 
     def __enter__(self):
         self._device.setup()

@@ -174,7 +174,7 @@ class SensorStatus:
     """
     A container for storing several sensor status.
     """
-    gpus: List[int]
+    gpus: GpuSet
     memory: List[MemInfo]
     temperature: List[SimpleResult]
     fan_speed: List[SimpleResult]
@@ -185,7 +185,7 @@ class SensorStatus:
         table = [header]
         for data in zip(self.gpus, self.memory, self.temperature, self.fan_speed, self.clock):
             table.append([
-                f"GPU[{data[0]}]",
+                f"GPU[{data[0].id}]",
                 f"{int(data[1].used / MB)} / {int(data[1].total / MB)} ({(data[1].used / data[1].total) * 100:.1f}%)",
                 f"{data[2].value}",
                 f"{data[3].value}",

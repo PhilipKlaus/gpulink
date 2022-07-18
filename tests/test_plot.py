@@ -9,7 +9,7 @@ from tests.misc import DeviceMock
 
 @pytest.fixture
 def device_ctx():
-    return DeviceCtx(device_type=DeviceMock)
+    return DeviceCtx(device=DeviceMock)
 
 
 @pytest.fixture

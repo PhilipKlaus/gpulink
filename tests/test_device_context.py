@@ -11,7 +11,7 @@ from tests.misc import DeviceMock, TEST_CLOCK, TEST_POWER_CONSUMPTION, TEST_GB, 
 
 @pytest.fixture
 def device_ctx():
-    return DeviceCtx(device_type=DeviceMock)
+    return DeviceCtx(device=DeviceMock)
 
 
 def test_valid_ctx(device_ctx):

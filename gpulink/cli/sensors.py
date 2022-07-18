@@ -5,6 +5,7 @@ from gpulink.cli.console import cls, set_cursor, get_spinner
 from gpulink.cli.tools import start_in_background
 from gpulink.stoppable_thread import StoppableThread
 from gpulink.types import TemperatureSensorType, ClockType, SensorStatus
+from tests.misc import DeviceMock
 
 
 class SensorWatcher(StoppableThread):
@@ -15,15 +16,15 @@ class SensorWatcher(StoppableThread):
     def get_sensor_status(self) -> SensorStatus:
         gpus = self._ctx.gpus
         return SensorStatus(
-            gpus=self._ctx.gpus,
-            memory=self._ctx.get_memory_info(gpus),
-            temperature=self._ctx.get_temperature(gpus, TemperatureSensorType.GPU),
-            fan_speed=self._ctx.get_fan_speed(gpus),
+            gpus=gpus,
+            memory=self._ctx.get_memory_info(gpus=gpus.ids),
+            temperature=self._ctx.get_temperature(TemperatureSensorType.GPU, gpus=gpus.ids),
+            fan_speed=self._ctx.get_fan_speed(gpus=gpus.ids),
             clock=zip(
-                self._ctx.get_clock(gpus, ClockType.CLOCK_GRAPHICS),
-                self._ctx.get_clock(gpus, ClockType.CLOCK_MEM),
-                self._ctx.get_clock(gpus, ClockType.CLOCK_SM),
-                self._ctx.get_clock(gpus, ClockType.CLOCK_VIDEO),
+                self._ctx.get_clock(ClockType.CLOCK_GRAPHICS, gpus=gpus.ids),
+                self._ctx.get_clock(ClockType.CLOCK_MEM, gpus=gpus.ids),
+                self._ctx.get_clock(ClockType.CLOCK_SM, gpus=gpus.ids),
+                self._ctx.get_clock(ClockType.CLOCK_VIDEO, gpus=gpus.ids),
             )
         )
 
@@ -39,7 +40,7 @@ class SensorWatcher(StoppableThread):
 def sensors(args):
     """Print GPU sensor output"""
 
-    with DeviceCtx() as ctx:
+    with DeviceCtx(device=DeviceMock) as ctx:
         watcher = SensorWatcher(ctx)
 
         if args.watch:
