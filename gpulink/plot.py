@@ -6,7 +6,7 @@ from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
 from .consts import SEC
-from .types import GPURecording
+from .types import GPURecording, PlotOptions
 
 
 def _clean_matplotlib():
@@ -22,42 +22,51 @@ class Plot:
 
     def __init__(self, recording: GPURecording):
         self._recording = recording
+        self._patch_plot_options()
+
+    def _patch_plot_options(self):
+        self._plot_options = PlotOptions(
+            plot_name="GPULink Recording",
+            y_axis_label=None,
+            y_axis_divider=1,
+            y_axis_range=None,
+            y_axis_unit=None
+        )
+
+        if self._recording.plot_options:
+            self._plot_options.patch(self._recording.plot_options)
 
     def _describe_plot(self, ax):
-        ax.set_title(f"GPULink Recording: {self._recording.rec_type.value[0]}")
+        ax.set_title(self._plot_options.plot_name)
         ax.legend(loc="upper left")
-        ax.set_ylabel(f"{self._recording.rec_type.value[0]} [{self._recording.rec_type.value[1].name}]")
+        if self._plot_options.y_axis_label:
+            ax.set_ylabel(f"{self._plot_options.y_axis_label} [{self._plot_options.y_axis_unit}]")
         ax.set_xlabel("Time [s]")
 
-    def generate_graph(self, scale_y_axis=False) -> Tuple[Figure, Axis]:
+    def generate_graph(self) -> Tuple[Figure, Axis]:
         """
         Generates the plot.
-        :param scale_y_axis: Scale y-axis to the actual value range. E.g. in case of plotting memory consumption this
-        means that the y-axis is scaled to the actual consumed memory and not to the maximum available memory.
         :return: A Tuple containing the generated Figure and Axis.
         """
         _clean_matplotlib()
-        unit_divider = self._recording.rec_type.value[1].value
-        max_val = 0
 
         fig, ax = plt.subplots()
 
-        for gpu in self._recording.gpus:
-            timestamps = self._recording.timeseries.timestamps[gpu.id]
-            data = self._recording.timeseries.data[gpu.id]
-            max_value = self._recording.plot_info.max_values[gpu.id]
+        for gpu, data in zip(self._recording.gpus, self._recording.timeseries):
+            if data.timestamps.size == 0 or data.data.size == 0:
+                raise ValueError("Timeseries data is empty")
+            if data.timestamps.shape != data.data.shape:
+                raise ValueError("Recorded timestamps and data must be of same shape")
 
-            if timestamps.shape[0] == 0:
-                raise RuntimeError("Recording data is empty")
-
-            max_val = max(max_val, max_value)
-            x_axis = (timestamps - timestamps[0]) / SEC
-            y_axis = data / unit_divider
+            x_axis = (data.timestamps - data.timestamps[0]) / SEC
+            y_axis = data.data / self._plot_options.y_axis_divider
 
             ax.plot(x_axis, y_axis, label=f"{gpu.name} [{gpu.id}]")
 
-        if not scale_y_axis:
-            plt.ylim([0, max_val / unit_divider])
+        if self._plot_options.y_axis_range:
+            min_val = self._plot_options.y_axis_range[0] / self._plot_options.y_axis_divider
+            max_val = self._plot_options.y_axis_range[1] / self._plot_options.y_axis_divider
+            ax.set_ylim([min_val, max_val])
 
         self._describe_plot(ax)
         return fig, ax

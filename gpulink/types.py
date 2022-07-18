@@ -1,6 +1,8 @@
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, fields
 from enum import Enum
-from typing import List, Union, Iterator
+from typing import List, Union, Iterator, Optional, Tuple
 
 import numpy as np
 from tabulate import tabulate
@@ -86,7 +88,11 @@ class MemInfo(QueryResult):
 
 @dataclass
 class TimeSeries:
-    def __init__(self, timestamps=[], data=[]):
+    def __init__(self, timestamps: Optional[List[int]] = None, data: Optional[List[Union[int, float]]] = None):
+        if data is None:
+            data = []
+        if timestamps is None:
+            timestamps = []
         self._timestamps = timestamps
         self._data = data
 
@@ -95,12 +101,30 @@ class TimeSeries:
         self._data.append(data)
 
     @property
-    def timestamps(self):
-        return self._timestamps
+    def timestamps(self) -> np.ndarray:
+        return np.array(self._timestamps)
 
     @property
-    def data(self):
-        return self._data
+    def data(self) -> np.ndarray:
+        return np.array(self._data)
+
+
+DATA = Union[int, float]
+
+
+@dataclass
+class PlotOptions:
+    plot_name: Optional[str] = None
+    y_axis_range: Optional[Tuple[DATA, DATA]] = None
+    y_axis_label: Optional[str] = None
+    y_axis_unit: Optional[str] = None
+    y_axis_divider: Optional[DATA] = None
+
+    def patch(self, other: PlotOptions):
+        for field in fields(PlotOptions):
+            value = other.__getattribute__(field.name)
+            if value:
+                self.__setattr__(field.name, value)
 
 
 @dataclass
@@ -116,7 +140,7 @@ class GPURecording:
     rec_type: RecType  # The type of recording
     gpus: GpuSet  # The recorded Gpu devices
     timeseries: List[TimeSeries]  # The recorded time series data
-    plot_info: PlotInfo  # Additional information for plotting
+    plot_options: Optional[PlotOptions] = None  # Optional Plot options
 
     def _create_metadata_table(self):
         return tabulate(
