@@ -3,7 +3,7 @@ import pytest
 
 from gpulink import DeviceCtx, Plot
 from gpulink.consts import SEC
-from gpulink.types import GPURecording, RecType, TimeSeries, PlotOptions
+from gpulink.gpu_types import GPURecording, TimeSeries, PlotOptions
 from tests.misc import DeviceMock
 
 
@@ -28,7 +28,7 @@ def time_series():
 
 def test_generate_graph_without_plot_options(device_ctx, time_series):
     with device_ctx as ctx:
-        recording = GPURecording(rec_type=RecType.MEMORY_USED, gpus=ctx.gpus, timeseries=time_series, plot_options=None)
+        recording = GPURecording(gpus=ctx.gpus, timeseries=time_series, plot_options=None)
 
         plot = Plot(recording)
         _, ax = plot.generate_graph()
@@ -47,7 +47,6 @@ def test_generate_graph_without_plot_options(device_ctx, time_series):
 def test_generate_graph_with_custom_plot_options(device_ctx, time_series):
     with device_ctx as ctx:
         recording = GPURecording(
-            rec_type=RecType.MEMORY_USED,
             gpus=ctx.gpus,
             timeseries=time_series,
             plot_options=PlotOptions(

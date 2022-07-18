@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from gpulink.types import ClockType, ClockId, TemperatureThreshold, \
+from gpulink.gpu_types import ClockType, ClockId, TemperatureThreshold, \
     TemperatureSensorType, MemInfo, SimpleResult, GpuSet
 
 

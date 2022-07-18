@@ -4,7 +4,7 @@ import pytest
 
 from gpulink import DeviceCtx, Recorder
 from gpulink.consts import MB
-from gpulink.types import RecType, TimeSeries, PlotOptions
+from gpulink.gpu_types import TimeSeries, PlotOptions
 from tests.misc import DeviceMock, TEST_GB
 
 
@@ -27,7 +27,6 @@ def test_fetch_and_return_data(device_ctx):
             rec.fetch_and_store()
 
         data = rec.get_recording()
-        assert data.rec_type == RecType.MEMORY_USED
         assert data.gpus == ctx.gpus
         assert data.timeseries == [
             TimeSeries([0, 0, 0], [TEST_GB // 2, TEST_GB // 2, TEST_GB // 2]),

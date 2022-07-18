@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 from gpulink import DeviceCtx, Plot, Recorder
 from gpulink.cli.tools import start_in_background
-from gpulink.types import GPURecording
+from gpulink.gpu_types import GPURecording
 
 
 def _check_output_file_type(output_path: Path):
@@ -40,7 +40,6 @@ def record(args):
         start_in_background(recorder, "[RECORDING]")
         recording = recorder.get_recording()
 
-    print("")
     print(recording)
 
     # _store_records(recording, args.output)

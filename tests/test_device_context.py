@@ -5,7 +5,7 @@ Tests for the DeviceCtx using a mocked device.
 import pytest
 
 from gpulink import ClockType, ClockId, DeviceCtx
-from gpulink.types import MemInfo, TemperatureThreshold, TemperatureSensorType, SimpleResult, Gpu, GpuSet
+from gpulink.gpu_types import MemInfo, TemperatureThreshold, TemperatureSensorType, SimpleResult, Gpu, GpuSet
 from tests.misc import DeviceMock, TEST_CLOCK, TEST_POWER_CONSUMPTION, TEST_GB, TEST_FAN_SPEED_PCT, TEST_TEMP
 
 

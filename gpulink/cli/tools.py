@@ -2,7 +2,7 @@ import signal
 import time
 from typing import Optional, Callable
 
-from gpulink.cli.console import get_spinner, print_and_clear
+from gpulink.cli.console import get_spinner, print_and_clear, cls
 from gpulink.stoppable_thread import StoppableThread
 
 
@@ -23,9 +23,13 @@ def start_in_background(thread: StoppableThread, waiting_msg: Optional[str] = No
     spinner = None
     if waiting_msg:
         spinner = get_spinner()
+        cls()
 
     thread.start()
     while thread.is_alive():
         if waiting_msg:
             print_and_clear(f"{waiting_msg} {next(spinner)}")
         time.sleep(0.1)
+
+    if waiting_msg:
+        cls()

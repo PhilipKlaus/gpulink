@@ -1,6 +1,6 @@
 # gpulink
 
-A library for monitoring and displaying NVIDIA GPU stats.  
+A library for monitoring NVIDIA GPU stats.  
 **gpulink** uses [pynvml](https://github.com/gpuopenanalytics/pynvml) - a Python wrapper for
 the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-library-nvml) (NVML).
 
@@ -15,6 +15,7 @@ the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-l
 To install **gpulink** using the Python Package Manager (PIP) run:  
 ```pip install gpulink```
 
+### Using from source
 **gpulink** can also be used from source. For this, perform the following steps to create a Python environment and to
 install the requirements:
 

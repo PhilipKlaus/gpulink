@@ -7,20 +7,7 @@ from typing import List, Union, Iterator, Optional, Tuple
 import numpy as np
 from tabulate import tabulate
 
-from gpulink.consts import MB
-
-
-@dataclass
-class Unit:
-    name: str
-    value: Union[int, float]
-
-
-class RecType(Enum):
-    """
-    Recordable types of GPU properties.
-    """
-    MEMORY_USED = ("Memory used", Unit("MB", MB))
+from gpulink.consts import MB, SEC
 
 
 ###########################################################################
@@ -137,34 +124,35 @@ class GPURecording:
     """
     A container for storing a gpu recording
     """
-    rec_type: RecType  # The type of recording
     gpus: GpuSet  # The recorded Gpu devices
     timeseries: List[TimeSeries]  # The recorded time series data
     plot_options: Optional[PlotOptions] = None  # Optional Plot options
 
-    def _create_metadata_table(self):
-        return tabulate(
-            [
-                ["Record duration [s]", "Sampling rate [Hz]"],
-                [self.timeseries.duration, self.timeseries.sampling_rate]
-            ],
-            tablefmt='fancy_grid')
-
     def _create_data_table(self):
-        table = [["GPU", "Name", f"{self.rec_type.value[0]} [{self.rec_type.value[1].name}]"]]
-        for gpu in self.gpus:
+        table = [["GPU", "Name", f"{self.plot_options.y_axis_label} [{self.plot_options.y_axis_unit}]"]]
+        for gpu, timeseries in zip(self.gpus, self.timeseries):
+            data = timeseries.data
             table.append(
                 [gpu.id,
                  gpu.name,
-                 f"minimum: {np.min(self.timeseries.data) / MB}\nmaximum: {np.max(self.timeseries.data) / MB}"
+                 f"minimum: {np.min(data) / MB}\nmaximum: {np.max(data) / MB}"
                  ]
             )
         return tabulate(table, tablefmt='fancy_grid')
 
+    def _get_duration(self):
+        timestamps = [t.timestamps for t in self.timeseries]
+        min_time = min([np.min(t) for t in timestamps])
+        max_time = min([np.max(t) for t in timestamps])
+        return (max_time - min_time) / SEC
+
     def __str__(self):
-        metadata_table = self._create_metadata_table()
         data_table = self._create_data_table()
-        return f"{metadata_table}\n{data_table}"
+        duration = self._get_duration()
+        sampling_rate = self.timeseries[0].data.size / duration
+        return f"{data_table}\n" \
+               f"Recording duration:\t\t{duration:.3f} [s]\n" \
+               f"Recording sampling rate:\t{sampling_rate:.3f} [Hz]"
 
 
 ##############################################################################

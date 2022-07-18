@@ -6,7 +6,7 @@ from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
 from .consts import SEC
-from .types import GPURecording, PlotOptions
+from .gpu_types import GPURecording, PlotOptions
 
 
 def _clean_matplotlib():

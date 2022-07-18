@@ -1,4 +1,4 @@
-from gpulink.types import PlotOptions
+from gpulink.gpu_types import PlotOptions
 
 
 def test_patch_plot_options():

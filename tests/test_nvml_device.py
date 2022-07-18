@@ -7,7 +7,7 @@ from collections import namedtuple
 import pytest
 
 from gpulink import DeviceCtx
-from gpulink.types import MemInfo, TemperatureThreshold, TemperatureSensorType, SimpleResult, Gpu, GpuSet, ClockType, \
+from gpulink.gpu_types import MemInfo, TemperatureThreshold, TemperatureSensorType, SimpleResult, Gpu, GpuSet, ClockType, \
     ClockId
 
 _GB = int(1e9)

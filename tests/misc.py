@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from gpulink.devices.base_device import BaseDevice
-from gpulink.types import GpuSet, Gpu, MemInfo, SimpleResult, TemperatureThreshold, ClockId, ClockType, \
+from gpulink.gpu_types import GpuSet, Gpu, MemInfo, SimpleResult, TemperatureThreshold, ClockId, ClockType, \
     TemperatureSensorType
 
 TEST_GB = int(1e9)

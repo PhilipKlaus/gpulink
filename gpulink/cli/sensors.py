@@ -4,7 +4,7 @@ from gpulink import DeviceCtx
 from gpulink.cli.console import cls, set_cursor, get_spinner
 from gpulink.cli.tools import start_in_background
 from gpulink.stoppable_thread import StoppableThread
-from gpulink.types import TemperatureSensorType, ClockType, SensorStatus
+from gpulink.gpu_types import TemperatureSensorType, ClockType, SensorStatus
 from tests.misc import DeviceMock
 
 
@@ -40,7 +40,7 @@ class SensorWatcher(StoppableThread):
 def sensors(args):
     """Print GPU sensor output"""
 
-    with DeviceCtx(device=DeviceMock) as ctx:
+    with DeviceCtx() as ctx:
         watcher = SensorWatcher(ctx)
 
         if args.watch:
