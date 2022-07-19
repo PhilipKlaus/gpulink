@@ -13,6 +13,7 @@ class PlotOptions:
     y_axis_label: Optional[str] = None
     y_axis_unit: Optional[str] = None
     y_axis_divider: Optional[DATA] = None
+    auto_scale: Optional[bool] = None
 
     def patch(self, other: PlotOptions):
         for field in fields(PlotOptions):

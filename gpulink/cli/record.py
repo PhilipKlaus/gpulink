@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 from gpulink import DeviceCtx, Plot, Recorder
 from gpulink.cli.tools import start_in_background
-from gpulink.recording import GPURecording
+from gpulink.recording.gpu_recording import Recording
 
 
 def _check_output_file_type(output_path: Path):
@@ -18,16 +18,18 @@ def _check_output_file_type(output_path: Path):
         raise ValueError(f"Output format '{output_path.suffix}' not supported")
 
 
-def _store_records(recording: GPURecording, output_path: Optional[Path]):
+def _store_records(recording: Recording, output_path: Optional[Path]):
     if output_path:
         graph = Plot(recording)
-        graph.save(output_path, scale_y_axis=True)
+        graph.save(output_path)
 
 
-def _display_plot(recording: GPURecording, plot: bool):
-    if plot:
+def _display_plot(recording: Recording, args):
+    if args.plot:
+        recording.plot_options.auto_scale = args.autoscale
+        print(args.autoscale)
         p = Plot(recording)
-        p.plot(scale_y_axis=True)
+        p.plot()
 
 
 def record(args):
@@ -42,5 +44,5 @@ def record(args):
 
     print(recording)
 
-    # _store_records(recording, args.output)
-    # _display_plot(recording, args.plot)
+    _store_records(recording, args.output)
+    _display_plot(recording, args)

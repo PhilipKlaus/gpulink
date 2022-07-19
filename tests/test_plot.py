@@ -3,9 +3,9 @@ import pytest
 
 from gpulink import DeviceCtx, Plot
 from gpulink.consts import SEC
-from gpulink.recording.timeseries import TimeSeries
-from gpulink.recording.gpu_recording import Recording
 from gpulink.plotting.plot_options import PlotOptions
+from gpulink.recording.gpu_recording import Recording
+from gpulink.recording.timeseries import TimeSeries
 from tests.device_mock import DeviceMock
 
 
@@ -56,7 +56,8 @@ def test_generate_graph_with_custom_plot_options(device_ctx, time_series):
                 y_axis_unit="°C",
                 y_axis_label="Temperature",
                 y_axis_divider=2,
-                y_axis_range=(-100, 100)
+                y_axis_range=(-100, 100),
+                auto_scale=False
             )
         )
 
@@ -72,3 +73,24 @@ def test_generate_graph_with_custom_plot_options(device_ctx, time_series):
         assert ax.get_ylim()[1] == 100 / 2
         np.testing.assert_equal(gpu1.get_ydata(True), time_series[0].data / 2)
         np.testing.assert_equal(gpu2.get_ydata(True), time_series[1].data / 2)
+
+
+def test_generate_graph_with_auto_scale(device_ctx, time_series):
+    with device_ctx as ctx:
+        recording = Recording(
+            gpus=ctx.gpus,
+            timeseries=time_series,
+            plot_options=PlotOptions(
+                plot_name="GPULink Recording: Foo Bar",
+                y_axis_unit="°C",
+                y_axis_label="Temperature",
+                y_axis_divider=2,
+                y_axis_range=(-100, 100),
+                auto_scale=True
+            )
+        )
+
+        plot = Plot(recording)
+        _, ax = plot.generate_graph()
+        assert ax.get_ylim()[0] is not -100 / 2
+        assert ax.get_ylim()[1] is not 100 / 2

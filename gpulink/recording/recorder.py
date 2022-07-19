@@ -60,7 +60,8 @@ class Recorder(StoppableThread):
             y_axis_unit="MB",
             y_axis_label="Memory usage",
             y_axis_divider=MB,
-            y_axis_range=(0, max([mem.total for mem in ctx.get_memory_info()]))
+            y_axis_range=(0, max([mem.total for mem in ctx.get_memory_info()])),
+            auto_scale=False
         )
         if plot_options:
             default_options.patch(plot_options)

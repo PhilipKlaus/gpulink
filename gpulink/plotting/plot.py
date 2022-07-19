@@ -64,10 +64,12 @@ class Plot:
 
             ax.plot(x_axis, y_axis, label=f"{gpu.name} [{gpu.id}]")
 
-        if self._plot_options.y_axis_range:
+        if not self._plot_options.auto_scale and self._plot_options.y_axis_range:
             min_val = self._plot_options.y_axis_range[0] / self._plot_options.y_axis_divider
             max_val = self._plot_options.y_axis_range[1] / self._plot_options.y_axis_divider
             ax.set_ylim([min_val, max_val])
+        else:
+            ax.autoscale()
 
         self._describe_plot(ax)
         return fig, ax
