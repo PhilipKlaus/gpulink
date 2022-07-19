@@ -87,7 +87,7 @@ with gpu.DeviceCtx() as ctx:
 ### Recording data
 
 **gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/recording/recorder.py) class
-for recording GPU properties. FOr simple instantiation use one of the provided factory methods, e.g.:
+for recording GPU properties. For simple instantiation use one of the provided factory methods, e.g.:
 
 ```
     recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
@@ -123,11 +123,16 @@ visualizing recordings using [matplotlib](https://matplotlib.org/):
     figure, axis = plot.generate_graph()
 ```
 
+The plot can be parametrized using
+the [PlotOptions](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/plotting/plot_options.py) dataclass. An
+example using custom plot options is given
+in [Basic example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_basic.py)
+
 ## Unit testing
 
 When using **gpulink** inside unit tests, create or use an already existing device mock,
-e.g. [DeviceMock](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/tests/device_mock.py).
-Then during creating a `DeviceCtx` provide the mock as follows:
+e.g. [DeviceMock](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/tests/device_mock.py). Then during creating
+a `DeviceCtx` provide the mock as follows:
 
 ```
 import gpulink as gpu
