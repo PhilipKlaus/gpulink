@@ -5,9 +5,9 @@ from gpulink.consts import MB
 from gpulink.devices.gpu import GpuSet
 from gpulink.plotting.plot_options import PlotOptions
 from gpulink.devices.query import QueryResult
-from gpulink.record.recording import Recording
+from gpulink.recording.gpu_recording import Recording
 from gpulink.threading.stoppable_thread import StoppableThread
-from gpulink.record.timeseries import TimeSeries
+from gpulink.recording.timeseries import TimeSeries
 
 
 class Recorder(StoppableThread):

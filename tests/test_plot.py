@@ -3,10 +3,10 @@ import pytest
 
 from gpulink import DeviceCtx, Plot
 from gpulink.consts import SEC
-from gpulink.record.timeseries import TimeSeries
-from gpulink.record.recording import Recording
+from gpulink.recording.timeseries import TimeSeries
+from gpulink.recording.gpu_recording import Recording
 from gpulink.plotting.plot_options import PlotOptions
-from tests.misc import DeviceMock
+from tests.device_mock import DeviceMock
 
 
 @pytest.fixture

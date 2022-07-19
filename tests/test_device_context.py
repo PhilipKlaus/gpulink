@@ -8,7 +8,7 @@ from gpulink import ClockType, ClockId, DeviceCtx
 from gpulink.devices.nvml_defines import TemperatureThreshold, TemperatureSensorType
 from gpulink.devices.query import SimpleResult, MemInfo
 from gpulink.devices.gpu import Gpu, GpuSet
-from tests.misc import DeviceMock, TEST_CLOCK, TEST_POWER_CONSUMPTION, TEST_GB, TEST_FAN_SPEED_PCT, TEST_TEMP
+from tests.device_mock import DeviceMock, TEST_CLOCK, TEST_POWER_CONSUMPTION, TEST_GB, TEST_FAN_SPEED_PCT, TEST_TEMP
 
 
 @pytest.fixture

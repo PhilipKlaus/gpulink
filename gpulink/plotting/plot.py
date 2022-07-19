@@ -6,7 +6,7 @@ from matplotlib.axis import Axis
 from matplotlib.figure import Figure
 
 from gpulink.consts import SEC
-from gpulink.record.recording import Recording
+from gpulink.recording.gpu_recording import Recording
 from .plot_options import PlotOptions
 
 

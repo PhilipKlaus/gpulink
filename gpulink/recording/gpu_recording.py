@@ -8,8 +8,8 @@ from tabulate import tabulate
 
 from gpulink.consts import MB, SEC
 from gpulink.devices.gpu import GpuSet
-from gpulink.record.timeseries import TimeSeries
 from gpulink.plotting.plot_options import PlotOptions
+from gpulink.recording.timeseries import TimeSeries
 
 
 @dataclass
