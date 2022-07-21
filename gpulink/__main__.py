@@ -14,11 +14,12 @@ def main():
     subparser = parser.add_subparsers(dest="subcommand")
 
     parser_sensors = subparser.add_parser("sensors", description="Print GPU sensor output")
-    parser_sensors.add_argument("-w", "--watch", help="Print regularly updated GPU stats", action="store_true")
+    parser_sensors.add_argument("-w", "--watch", help="Poll and print GPU status", action="store_true")
     parser_sensors.set_defaults(func=sensors)
 
     parser_record = subparser.add_parser("record", description="Record GPU properties")
     parser_record.add_argument("-m", "--memory", help="Record amount of used GPU memory (default)", action="store_true")
+    parser_record.add_argument("-a", "--autoscale", help="Auto-scale the y axis of the plot (True per default)", type=bool, default=True)
     parser_record.add_argument("-o", "--output", type=Path, default=None,
                                help="Path to save the generated plot which shows the recorded GPU property over time.")
     parser_record.add_argument("-p", "--plot",
