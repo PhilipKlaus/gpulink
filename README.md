@@ -1,6 +1,6 @@
 # gpulink
 
-A library for monitoring NVIDIA GPU stats.  
+A library and command-line tool for monitoring NVIDIA GPU stats.  
 **gpulink** uses [pynvml](https://github.com/gpuopenanalytics/pynvml) - a Python wrapper for
 the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-library-nvml) (NVML).
 
@@ -55,7 +55,7 @@ optional arguments:
 ╘════════╧═════════════════════╧═════════════╧═════════════════╧═══════════════╛
 ```
 
-- Record gpu memory information and save a plot as PNG: `gpulink record -o memory.png`
+- Record the memory usage over time, generate a plot and save it as a png image: `gpulink record -o memory.png`
 
 ```
 ╒═════╤══════════════════╤══════════════════════╕
