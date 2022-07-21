@@ -69,11 +69,12 @@ class SensorStatus:
     clock: Iterator
 
     def __str__(self):
-        header = ["GPU", "Memory [MB]", "Temp [°C]", "Fan speed [%]", "Clock [MHz]"]
+        header = ["ID", "Name", "Memory [MB]", "Temp [°C]", "Fan speed [%]", "Clock [MHz]"]
         table = [header]
         for data in zip(self.gpus, self.memory, self.temperature, self.fan_speed, self.clock):
             table.append([
-                f"GPU[{data[0].id}]",
+                f"{data[0].id}",
+                f"{data[0].name}",
                 f"{int(data[1].used / MB)} / {int(data[1].total / MB)} ({(data[1].used / data[1].total) * 100:.1f}%)",
                 f"{data[2].value}",
                 f"{data[3].value}",

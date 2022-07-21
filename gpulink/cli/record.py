@@ -27,7 +27,6 @@ def _store_records(recording: Recording, output_path: Optional[Path]):
 def _display_plot(recording: Recording, args):
     if args.plot:
         recording.plot_options.auto_scale = args.autoscale
-        print(args.autoscale)
         p = Plot(recording)
         p.plot()
 

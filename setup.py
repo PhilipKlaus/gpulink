@@ -4,7 +4,7 @@ from setuptools import setup
 
 if sys.version_info < (3, 7):
     sys.exit('Sorry, Python < 3.7 is not supported')
-    
+
 with open("PYPI.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
@@ -12,7 +12,7 @@ tests_require = ['pytest', 'pytest-mock', 'pytest-cov']
 
 setup(
     name="gpulink",
-    version="0.2.0",
+    version="0.3.0",
     author="Philip Klaus",
     description="A simple tool for monitoring and displaying GPU stats",
     long_description=long_description,
@@ -26,7 +26,8 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=['gpulink', 'gpulink.cli'],
+    packages=['gpulink', 'gpulink.cli', 'gpulink.devices', 'gpulink.plotting', 'gpulink.recording',
+              'gpulink.threading'],
     python_requires=">=3.6",
     install_requires=[
         "pynvml >= 11.4.1",

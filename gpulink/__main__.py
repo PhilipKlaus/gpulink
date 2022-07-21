@@ -19,14 +19,17 @@ def main():
 
     parser_record = subparser.add_parser("record", description="Record GPU properties")
     parser_record.add_argument("-m", "--memory", help="Record amount of used GPU memory (default)", action="store_true")
-    parser_record.add_argument("-a", "--autoscale", help="Auto-scale the y axis of the plot (True per default)", type=bool, default=True)
+    parser_record.add_argument("--autoscale", help="Enable auto-scaling of the y axis in the plot (default)",
+                               action="store_true")
+    parser_record.add_argument("--no-autoscale", help="Disable auto-scaling of the y axis in the plot",
+                               dest='autoscale', action="store_false")
     parser_record.add_argument("-o", "--output", type=Path, default=None,
                                help="Path to save the generated plot which shows the recorded GPU property over time.")
     parser_record.add_argument("-p", "--plot",
                                help="Show the generated plot which shows the recorded GPU property over time.",
                                action="store_true")
     parser_record.set_defaults(func=record)
-
+    parser_record.set_defaults(autoscale=True)
     args = parser.parse_args()
     if args.subcommand is None:
         parser.print_help()
