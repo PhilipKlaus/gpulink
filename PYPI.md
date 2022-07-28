@@ -6,7 +6,13 @@ the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-l
 
 ## Current status
 
-**⚠️!!! This project is under heavy development - breaking changes between versions are possible!!!⚠️**
+**⚠ This project is in a very early state and under heavy development - breaking changes between versions are possible
+⚠**
+
+## Requirements
+
+**gpulink** requires the NVIDIA Management Library to be installed which is shipped together
+with [nvidia-smi](https://developer.nvidia.com/nvidia-system-management-interface).
 
 ## Installation
 
@@ -115,3 +121,16 @@ import gpulink as gpu
 with gpu.DeviceCtx(device=DeviceMock) as ctx:
    ...
 ```
+
+## Currently planned features
+
+- Recording arbitrary GPU stats
+- [Curses](https://docs.python.org/3/howto/curses.html) based ui (
+  using [windows-curses](https://pypi.org/project/windows-curses/))
+- Live-plotting of GPU stats
+
+## Troubleshooting
+
+- If you get the error message below, please ensure that the NVIDIA Management Library is installed on you system by
+  typing `nvidia-smi --version` into a terminal:  
+  ```pynvml.nvml.NVMLError_LibraryNotFound: NVML Shared Library Not Found```.  

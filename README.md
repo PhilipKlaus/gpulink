@@ -54,7 +54,7 @@ optional arguments:
 ╒════════╤═════════════════════╤═════════════╤═════════════════╤═══════════════╕
 │ GPU    │ Memory [MB]         │   Temp [°C] │   Fan speed [%] │ Clock [MHz]   │
 ╞════════╪═════════════════════╪═════════════╪═════════════════╪═══════════════╡
-│ GPU[0] │ 1588 / 25769 (6.2%) │          34 │              41 │ Graph.: 173   │
+│ 0      │ 1588 / 25769 (6.2%) │          34 │              41 │ Graph.: 173   │
 │        │                     │             │                 │ Memory: 403   │
 │        │                     │             │                 │ SM: 173       │
 │        │                     │             │                 │ Video: 539    │
@@ -70,8 +70,8 @@ optional arguments:
 │ 0   │ NVIDIA TITAN RTX │ minimum: 1584.754688 │
 │     │                  │ maximum: 2204.585984 │
 ╘═════╧══════════════════╧══════════════════════╛
-Recording duration:         2.500 [s]" \
-Recording sampling rate:    300.000 [Hz]"
+Duration:       2.500       [s]"
+Sampling rate:  300.000     [Hz]"
 ```
 
 ![Memory consumption over time](https://github.com/PhilipKlaus/gpu-link/blob/main/docs/mem_consumption.png)
