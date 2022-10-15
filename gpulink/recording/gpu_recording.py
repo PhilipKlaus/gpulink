@@ -43,6 +43,9 @@ class Recording:
         data_table = self._create_data_table()
         duration = self._get_duration()
         sampling_rate = self.timeseries[0].data.size / duration
-        return f"{data_table}\n" \
-               f"Recording duration:\t\t{duration:.3f} [s]\n" \
-               f"Recording sampling rate:\t{sampling_rate:.3f} [Hz]"
+
+        fill = ' '
+        align = '<'
+        width = 30
+        return data_table + "\n" + f'{"Recording duration:":{fill}{align}{width}} {duration:.3f} [s]\n' \
+                                   f'{"Recording sampling rate:":{fill}{align}{width}} {sampling_rate:.3f} [Hz]'
