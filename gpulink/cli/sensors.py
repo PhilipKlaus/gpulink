@@ -69,7 +69,7 @@ class SensorStatus:
     clock: Iterator
 
     def __str__(self):
-        header = ["ID", "Name", "Memory [MB]", "Temp [°C]", "Fan speed [%]", "Clock [MHz]"]
+        header = ["GPU", "Name", "Memory [MB]", "Temp [°C]", "Fan speed [%]", "Clock [MHz]"]
         table = [header]
         for data in zip(self.gpus, self.memory, self.temperature, self.fan_speed, self.clock):
             table.append([

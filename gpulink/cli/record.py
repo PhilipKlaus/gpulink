@@ -18,10 +18,11 @@ def _check_output_file_type(output_path: Path):
         raise ValueError(f"Output format '{output_path.suffix}' not supported")
 
 
-def _store_records(recording: Recording, output_path: Optional[Path]):
-    if output_path:
+def _store_records(recording: Recording, args):
+    if args.output:
+        recording.plot_options.auto_scale = args.autoscale
         graph = Plot(recording)
-        graph.save(output_path)
+        graph.save(args.output)
 
 
 def _display_plot(recording: Recording, args):
@@ -43,5 +44,5 @@ def record(args):
 
     print(recording)
 
-    _store_records(recording, args.output)
+    _store_records(recording, args)
     _display_plot(recording, args)
