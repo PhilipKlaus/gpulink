@@ -44,5 +44,5 @@ class Recording:
         duration = f"{self._get_duration():.3f}"
         sampling_rate = f"{self.timeseries[0].data.size / self._get_duration():.3f}"
         return f"{data_table}\n" \
-               f"{'Duration':32}{duration} [s]\n" \
-               f"{'Sampling rate':32}{sampling_rate} [Hz]"
+               f"{'Duration:':25}{duration} [s]\n" \
+               f"{'Sampling rate:':25}{sampling_rate} [Hz]"

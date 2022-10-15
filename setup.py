@@ -28,7 +28,7 @@ setup(
     ],
     packages=['gpulink', 'gpulink.cli', 'gpulink.devices', 'gpulink.plotting', 'gpulink.recording',
               'gpulink.threading'],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
         "pynvml >= 11.4.1",
         "matplotlib >= 3.5.1",
