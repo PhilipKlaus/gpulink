@@ -6,7 +6,7 @@ from typing import List, Optional
 import numpy as np
 from tabulate import tabulate
 
-from gpulink.consts import MB, SEC
+from gpulink.consts import SEC
 from gpulink.devices.gpu import GpuSet
 from gpulink.plotting.plot_options import PlotOptions
 from gpulink.recording.timeseries import TimeSeries
@@ -28,7 +28,8 @@ class Recording:
             table.append(
                 [gpu.id,
                  gpu.name,
-                 f"minimum: {np.min(data) / MB}\nmaximum: {np.max(data) / MB}"
+                 f"minimum: {np.min(data) / self.plot_options.y_axis_divider}\n"
+                 f"maximum: {np.max(data) / self.plot_options.y_axis_divider} "
                  ]
             )
         return tabulate(table, tablefmt='fancy_grid')

@@ -3,8 +3,8 @@ from pathlib import Path
 
 import colorama
 
-from gpulink.cli.record import record
-from gpulink.cli.sensors import sensors
+from gpulink.cli.cmd_record import record
+from gpulink.cli.cmd_sensors import sensors
 
 
 def main():

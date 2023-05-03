@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 from matplotlib import pyplot as plt
 
@@ -38,7 +37,10 @@ def record(args):
     _check_output_file_type(args.output)
 
     with DeviceCtx() as ctx:
-        recorder = Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
+        # recorder = Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
+        # recorder = Recorder.create_temperature_recorder(ctx, ctx.gpus.ids)
+        # recorder = Recorder.create_fan_speed_recorder(ctx, ctx.gpus.ids)
+        recorder = Recorder.create_graphics_clock_recorder(ctx, ctx.gpus.ids)
         start_in_background(recorder, "[RECORDING]")
         recording = recorder.get_recording()
 
