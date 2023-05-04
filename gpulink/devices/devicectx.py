@@ -2,11 +2,11 @@ from functools import wraps
 from typing import List, Optional, Type
 
 from gpulink.devices.base_device import BaseDevice
-from gpulink.devices.nvml_device import LocalNvmlGpu
+from gpulink.devices.gpu import GpuSet
 from gpulink.devices.nvml_defines import TemperatureThreshold, ClockId, \
     ClockType, TemperatureSensorType
+from gpulink.devices.nvml_device import LocalNvmlGpu
 from gpulink.devices.query import SimpleResult, MemInfo
-from gpulink.devices.gpu import GpuSet
 
 
 def ctx_guard(fn):
