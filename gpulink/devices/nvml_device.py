@@ -1,6 +1,7 @@
 from time import time_ns
 from typing import Type, Optional, cast, List
 
+import pynvml
 from pynvml import nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGetName, nvmlDeviceGetClock, \
     nvmlDeviceGetTemperatureThreshold, nvmlDeviceGetClockInfo, nvmlDeviceGetPowerUsage, nvmlDeviceGetTemperature, \
     nvmlDeviceGetMemoryInfo, nvmlDeviceGetFanSpeed_v2, nvmlDeviceGetFanSpeed, nvmlInit, nvmlShutdown
@@ -50,8 +51,11 @@ class LocalNvmlGpu(BaseDevice):
         return res
 
     def setup(self) -> None:
-        nvmlInit()
-        self._get_device_handles()
+        try:
+            nvmlInit()
+            self._get_device_handles()
+        except pynvml.nvml.NVMLError as e:
+            raise RuntimeError("Cannot initialize NVML library - Is it installed?")
 
     def shutdown(self) -> None:
         nvmlShutdown()
