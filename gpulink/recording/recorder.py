@@ -1,3 +1,4 @@
+from time import perf_counter
 from typing import List, Callable, Tuple, Union, Optional
 
 from gpulink import DeviceCtx
@@ -10,6 +11,19 @@ from gpulink.recording.gpu_recording import Recording
 from gpulink.recording.timeseries import TimeSeries
 from gpulink.threading.stoppable_thread import StoppableThread
 
+EchoFunction = Optional[Callable[[], None]]
+
+
+def _clock_type_to_str(clock_type: ClockType):
+    if clock_type == ClockType.CLOCK_SM:
+        return "Shared Memory Clock"
+    elif clock_type == ClockType.CLOCK_GRAPHICS:
+        return "Graphics Clock"
+    elif clock_type == ClockType.CLOCK_MEM:
+        return "Memory Clock"
+    else:
+        return "Video Clock"
+
 
 class Recorder(StoppableThread):
 
@@ -19,7 +33,8 @@ class Recorder(StoppableThread):
             res_filter: Callable[[QueryResult], Union[int, float, str]],
             ctx: DeviceCtx,
             gpus: List[int],
-            plot_options: Optional[PlotOptions] = None
+            plot_options: Optional[PlotOptions] = None,
+            echo_function: EchoFunction = None
     ):
         super().__init__()
         self._cmd = cmd
@@ -27,6 +42,7 @@ class Recorder(StoppableThread):
         self._ctx = ctx
         self._gpus = gpus
         self._plot_options = plot_options
+        self._echo_function = echo_function
 
         self._timeseries = [TimeSeries() for _ in gpus]
 
@@ -44,8 +60,13 @@ class Recorder(StoppableThread):
             self._timeseries[idx].add_record(record[0], record[1])
 
     def run(self):
+        old_time = 0
         while not self.should_stop:
             self._fetch_and_store()
+            new_time = perf_counter()
+            if self._echo_function and new_time - old_time > 0.10:
+                self._echo_function()
+                old_time = new_time
 
     def get_recording(self) -> Recording:
         return Recording(
@@ -55,7 +76,9 @@ class Recorder(StoppableThread):
         )
 
     @classmethod
-    def create_memory_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None):
+    def create_memory_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                               echo_function: EchoFunction = None):
+
         default_options = PlotOptions(
             plot_name="Memory usage",
             y_axis_unit="MB",
@@ -66,16 +89,18 @@ class Recorder(StoppableThread):
         )
         if plot_options:
             default_options.patch(plot_options)
-        return Recorder(
+        return cls(
             cmd=lambda c: c.get_memory_info(gpus),
             res_filter=lambda res: res.used,
             ctx=ctx,
             gpus=gpus,
-            plot_options=default_options
+            plot_options=default_options,
+            echo_function=echo_function
         )
 
     @classmethod
-    def create_temperature_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None):
+    def create_temperature_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                                    echo_function: EchoFunction = None):
         default_options = PlotOptions(
             plot_name="Temperature",
             y_axis_unit="°C",
@@ -86,16 +111,18 @@ class Recorder(StoppableThread):
         )
         if plot_options:
             default_options.patch(plot_options)
-        return Recorder(
+        return cls(
             cmd=lambda c: c.get_temperature(sensor_type=TemperatureSensorType.GPU, gpus=gpus),
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,
-            plot_options=default_options
+            plot_options=default_options,
+            echo_function=echo_function
         )
 
     @classmethod
-    def create_fan_speed_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None):
+    def create_fan_speed_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                                  echo_function: EchoFunction = None):
         default_options = PlotOptions(
             plot_name="Fan speed",
             y_axis_unit="%",
@@ -106,18 +133,22 @@ class Recorder(StoppableThread):
         )
         if plot_options:
             default_options.patch(plot_options)
-        return Recorder(
+        return cls(
             cmd=lambda c: c.get_fan_speed(gpus=gpus),
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,
-            plot_options=default_options
+            plot_options=default_options,
+            echo_function=echo_function
         )
 
     @classmethod
     def create_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], clock_type: ClockType,
-                              plot_options: Optional[PlotOptions] = None):
+                              plot_options: Optional[PlotOptions] = None, echo_function: EchoFunction = None):
+        clock_name = _clock_type_to_str(clock_type)
         default_options = PlotOptions(
+            plot_name=clock_name,
+            y_axis_label=clock_name,
             y_axis_unit="MHz",
             y_axis_divider=1,
             y_axis_range=None,
@@ -125,20 +156,32 @@ class Recorder(StoppableThread):
         )
         if plot_options:
             default_options.patch(plot_options)
-        return Recorder(
+
+        return cls(
             cmd=lambda c: c.get_clock(clock_type, gpus=gpus),
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,
-            plot_options=default_options
+            plot_options=default_options,
+            echo_function=echo_function
         )
 
     @classmethod
-    def create_graphics_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int],
-                                       plot_options: Optional[PlotOptions] = None):
-        default_options = PlotOptions(plot_name="Graphics Clock", y_axis_label="Graphics Clock")
-        if plot_options:
-            default_options.patch(plot_options)
-        return cls.create_clock_recorder(
-            ctx, gpus, ClockType.CLOCK_GRAPHICS, default_options
-        )
+    def create_graphics_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                                       echo_function: EchoFunction = None):
+        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_GRAPHICS, plot_options, echo_function)
+
+    @classmethod
+    def create_video_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                                    echo_function: EchoFunction = None):
+        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_VIDEO, plot_options, echo_function)
+
+    @classmethod
+    def create_sm_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                                 echo_function: EchoFunction = None):
+        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_SM, plot_options, echo_function)
+
+    @classmethod
+    def create_memory_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                                     echo_function: EchoFunction = None):
+        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_MEM, plot_options, echo_function)

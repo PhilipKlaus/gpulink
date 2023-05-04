@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -43,7 +44,7 @@ class Recording:
     def __str__(self):
         data_table = self._create_data_table()
         duration = f"{self._get_duration():.3f}"
-        sampling_rate = f"{self.timeseries[0].data.size / self._get_duration():.3f}"
+        sampling_rate = f"{self.timeseries[0].data.size / max(self._get_duration(), sys.float_info.epsilon):.3f}"
         return f"{data_table}\n" \
                f"{'Duration:':25}{duration} [s]\n" \
                f"{'Sampling rate:':25}{sampling_rate} [Hz]"

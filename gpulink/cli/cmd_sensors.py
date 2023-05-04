@@ -4,16 +4,16 @@ import time
 from dataclasses import dataclass
 from typing import List, Iterator
 
+import click
 from tabulate import tabulate
 
 from gpulink import DeviceCtx
-from gpulink.cli.console import cls, set_cursor, get_spinner
-from gpulink.cli.tools import start_in_background
+from gpulink.cli.console import get_spinner, set_cursor
 from gpulink.consts import MB
 from gpulink.devices.gpu import GpuSet
-from gpulink.threading.stoppable_thread import StoppableThread
 from gpulink.devices.nvml_defines import TemperatureSensorType, ClockType
 from gpulink.devices.query import SimpleResult, MemInfo
+from gpulink.threading.stoppable_thread import StoppableThread
 
 
 class SensorWatcher(StoppableThread):
@@ -37,24 +37,30 @@ class SensorWatcher(StoppableThread):
         )
 
     def run(self) -> None:
-        cls()
+        click.clear()
         spinner = get_spinner()
         while not self.should_stop:
-            print(f"{self.get_sensor_status()}\n[WATCHING] {next(spinner)}{set_cursor(1, 1)}", end="")
-            time.sleep(0.5)
-        cls()
+            click.echo(self.get_sensor_status())
+            click.echo("[WATCHING] ", nl=False)
+            click.secho(f"{next(spinner)}{set_cursor(1, 1)}", nl=False, fg="green")
+            time.sleep(0.1)
+        click.clear()
 
 
-def sensors(args):
-    """Print GPU sensor output"""
-
+@click.command(name="sensors")
+@click.option('--watch', '-w', is_flag=True, help="Poll and print GPU sensor status.")
+def sensors(watch: bool):
+    """
+    Fetch and print the GPU sensor status.
+    :param watch: Set too bool if the sensor status should be polled and printed continuously.
+    """
     with DeviceCtx() as ctx:
         watcher = SensorWatcher(ctx)
-
-        if args.watch:
-            start_in_background(watcher)
-        else:
-            print(watcher.get_sensor_status())
+        if watch:
+            watcher.start()
+            click.pause("")
+            watcher.stop(auto_join=True)
+        click.echo(watcher.get_sensor_status())
 
 
 @dataclass
