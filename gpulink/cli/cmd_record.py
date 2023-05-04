@@ -20,7 +20,7 @@ def _echo(spinner: cycle):
 class _RecOptions:
     plot: bool
     autoscale: bool
-    output: Optional[Path] = None,
+    output: Optional[Path] = None
     spinner = get_spinner()
 
 
