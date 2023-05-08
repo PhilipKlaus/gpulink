@@ -1,6 +1,24 @@
+import codecs
+import os
 import sys
 
 from setuptools import setup
+
+
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
+        return fp.read()
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
+
 
 if sys.version_info < (3, 7):
     sys.exit('Sorry, Python < 3.7 is not supported')
@@ -12,7 +30,7 @@ tests_require = ['pytest', 'pytest-mock', 'pytest-cov']
 
 setup(
     name="gpulink",
-    version="0.3.0",
+    version=get_version("gpulink/__init__.py"),
     author="Philip Klaus",
     description="A simple tool for monitoring and displaying GPU stats",
     long_description=long_description,

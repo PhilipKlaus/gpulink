@@ -40,7 +40,7 @@ def test_fetch_and_return_data(device_ctx):
             y_axis_range=(0, TEST_GB),
             y_axis_divider=MB,
             y_axis_label="Memory usage",
-            auto_scale=False
+            auto_scale=True
         )
 
 
@@ -52,7 +52,7 @@ def test_recorder_thread_with_custom_plot_options(device_ctx):
             y_axis_unit="°C",
             y_axis_label="Foo Bar",
             y_axis_range=(0, 42),
-            auto_scale=False
+            auto_scale=True
         )
         rec = Recorder.create_memory_recorder(
             ctx,

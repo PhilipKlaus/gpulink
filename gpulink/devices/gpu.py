@@ -17,6 +17,7 @@ class GpuSet:
     """
     A set of GPUs.
     """
+
     def __init__(self, gpus: List[Gpu]):
         self._gpus = gpus
 
