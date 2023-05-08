@@ -33,15 +33,15 @@ class SensorWatcher(StoppableThread):
                 self._ctx.get_clock(ClockType.CLOCK_MEM, gpus=gpus.ids),
                 self._ctx.get_clock(ClockType.CLOCK_SM, gpus=gpus.ids),
                 self._ctx.get_clock(ClockType.CLOCK_VIDEO, gpus=gpus.ids),
-            )
+            ),
+            power_usage=self._ctx.get_power_usage(gpus.ids)
         )
 
     def run(self) -> None:
         click.clear()
         spinner = get_spinner()
         while not self.should_stop:
-            click.echo(self.get_sensor_status())
-            click.echo("[WATCHING] ", nl=False)
+            click.echo(f"{self.get_sensor_status()}\n[WATCHING] ", nl=False)
             click.secho(f"{next(spinner)}{set_cursor(1, 1)}", nl=False, fg="green")
             time.sleep(0.1)
         click.clear()
@@ -73,11 +73,12 @@ class SensorStatus:
     temperature: List[SimpleResult]
     fan_speed: List[SimpleResult]
     clock: Iterator
+    power_usage: List[SimpleResult]
 
     def __str__(self):
-        header = ["GPU", "Name", "Memory [MB]", "Temp [°C]", "Fan speed [%]", "Clock [MHz]"]
+        header = ["GPU", "Name", "Memory [MB]", "Temp [°C]", "Fan speed [%]", "Clock [MHz]", "Power Usage [W]"]
         table = [header]
-        for data in zip(self.gpus, self.memory, self.temperature, self.fan_speed, self.clock):
+        for data in zip(self.gpus, self.memory, self.temperature, self.fan_speed, self.clock, self.power_usage):
             table.append([
                 f"{data[0].id}",
                 f"{data[0].name}",
@@ -85,6 +86,7 @@ class SensorStatus:
                 f"{data[2].value}",
                 f"{data[3].value}",
                 f"Graph.: {data[4][0].value}\nMemory: {data[4][1].value}\n"
-                f"SM: {data[4][2].value}\nVideo: {data[4][3].value} "
+                f"SM: {data[4][2].value}\nVideo: {data[4][3].value}",
+                f"{data[5].value / 1000}"
             ])
         return tabulate(table, headers='firstrow', tablefmt='fancy_grid')
