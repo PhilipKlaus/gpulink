@@ -2,7 +2,7 @@ from time import perf_counter
 from typing import List, Callable, Tuple, Union, Optional
 
 from gpulink import DeviceCtx
-from gpulink.consts import MB
+from gpulink.consts import MB, WATTS
 from gpulink.devices.gpu import GpuSet
 from gpulink.devices.nvml_defines import TemperatureSensorType, ClockType
 from gpulink.devices.query import QueryResult
@@ -85,7 +85,7 @@ class Recorder(StoppableThread):
             y_axis_label="Memory usage",
             y_axis_divider=MB,
             y_axis_range=(0, max([mem.total for mem in ctx.get_memory_info()])),
-            auto_scale=False
+            auto_scale=True
         )
         if plot_options:
             default_options.patch(plot_options)
@@ -129,12 +129,35 @@ class Recorder(StoppableThread):
             y_axis_label="Fan speed",
             y_axis_divider=1,
             y_axis_range=(0, 100),
-            auto_scale=False
+            auto_scale=True
         )
         if plot_options:
             default_options.patch(plot_options)
         return cls(
             cmd=lambda c: c.get_fan_speed(gpus=gpus),
+            res_filter=lambda res: res.value,
+            ctx=ctx,
+            gpus=gpus,
+            plot_options=default_options,
+            echo_function=echo_function
+        )
+
+    @classmethod
+    def create_power_usage_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
+                                    echo_function: EchoFunction = None):
+
+        default_options = PlotOptions(
+            plot_name="Power usage",
+            y_axis_unit="W",
+            y_axis_label="Power usage",
+            y_axis_divider=WATTS,
+            y_axis_range=None,
+            auto_scale=True
+        )
+        if plot_options:
+            default_options.patch(plot_options)
+        return cls(
+            cmd=lambda c: c.get_power_usage(gpus=gpus),
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,

@@ -127,6 +127,17 @@ def fan_speed(rec_options: _RecOptions) -> None:
     _handle_record(rec_options, Recorder.create_fan_speed_recorder)
 
 
+@record.command()
+@click.pass_obj
+def power_usage(rec_options: _RecOptions) -> None:
+    """
+    Record GPU power usage.
+    \f
+    :return: None
+    """
+    _handle_record(rec_options, Recorder.create_power_usage_recorder)
+
+
 @record.group()
 @click.pass_obj
 def clock(rec_options: _RecOptions) -> None:

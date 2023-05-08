@@ -9,7 +9,7 @@ from tabulate import tabulate
 
 from gpulink import DeviceCtx
 from gpulink.cli.console import get_spinner, set_cursor
-from gpulink.consts import MB
+from gpulink.consts import MB, WATTS
 from gpulink.devices.gpu import GpuSet
 from gpulink.devices.nvml_defines import TemperatureSensorType, ClockType
 from gpulink.devices.query import SimpleResult, MemInfo
@@ -87,6 +87,6 @@ class SensorStatus:
                 f"{data[3].value}",
                 f"Graph.: {data[4][0].value}\nMemory: {data[4][1].value}\n"
                 f"SM: {data[4][2].value}\nVideo: {data[4][3].value}",
-                f"{data[5].value / 1000}"
+                f"{data[5].value / WATTS}"
             ])
         return tabulate(table, headers='firstrow', tablefmt='fancy_grid')
