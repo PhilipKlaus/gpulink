@@ -34,7 +34,7 @@ def patch_nvcontext(mocker):
     mocker.patch("gpulink.devices.nvml_device.nvmlShutdown")
     mocker.patch("gpulink.devices.nvml_device.nvmlDeviceGetCount", return_value=2)
     mocker.patch("gpulink.devices.nvml_device.nvmlDeviceGetHandleByIndex")
-    mocker.patch("gpulink.devices.nvml_device.nvmlDeviceGetName", return_value=b"GPU_TEST")
+    mocker.patch("gpulink.devices.nvml_device.nvmlDeviceGetName", return_value="GPU_TEST")
     mocker.patch("gpulink.devices.nvml_device.nvmlDeviceGetMemoryInfo",
                  return_value=MemoryInfo(total=_GB, used=_GB // 2, free=_GB // 2))
     mocker.patch("gpulink.devices.nvml_device.nvmlDeviceGetFanSpeed", return_value=_FAN_SPEED_PCT)
