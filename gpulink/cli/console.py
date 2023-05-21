@@ -8,4 +8,4 @@ def set_cursor(x: int, y: int):
 
 
 def get_spinner() -> itertools.cycle:
-    return itertools.cycle(["⢿", "⣻", "⣽", "⣾", "⣷", "⣯", "⣟", "⡿"])
+    return itertools.cycle(['-', '\\', '|', '/'])
