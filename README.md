@@ -6,8 +6,7 @@ the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-l
 
 ## Current status
 
-**⚠ This project is in a very early state and under heavy development - breaking changes between versions are possible
-⚠**
+⚠ gpulink is in a very early state - breaking changes between versions are possible!
 
 ## Requirements
 
@@ -35,15 +34,15 @@ install the requirements:
 **gpulink** can either be imported as a library or can be used from the command line:
 
 ```
-usage: gpulink [-h] {sensors,record} ...
+Usage: GPU-Link: Monitor NVIDIA GPUs [OPTIONS] COMMAND [ARGS]...
 
-GPU-Link: Monitor NVIDIA GPU status
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
 
-positional arguments:
-  {sensors,record}
-
-optional arguments:
-  -h, --help        show this help message and exit
+Commands:
+  record   Record GPU properties.
+  sensors  Fetch and print the GPU sensor status.
 ```
 
 ### Examples
@@ -51,17 +50,21 @@ optional arguments:
 - View GPU sensor status: `gpulink sensors`
 
 ```
-╒════════╤═════════════════════╤═════════════╤═════════════════╤═══════════════╕
-│ GPU    │ Memory [MB]         │   Temp [°C] │   Fan speed [%] │ Clock [MHz]   │
-╞════════╪═════════════════════╪═════════════╪═════════════════╪═══════════════╡
-│ 0      │ 1588 / 25769 (6.2%) │          34 │              41 │ Graph.: 173   │
-│        │                     │             │                 │ Memory: 403   │
-│        │                     │             │                 │ SM: 173       │
-│        │                     │             │                 │ Video: 539    │
-╘════════╧═════════════════════╧═════════════╧═════════════════╧═══════════════╛
+╒═══════╤══════════════════╤═════════════════════╤═════════════╤═════════════════╤═══════════════╤═══════════════════╕
+│   GPU │ Name             │ Memory [MB]         │   Temp [°C] │   Fan speed [%] │ Clock [MHz]   │   Power Usage [W] │
+╞═══════╪══════════════════╪═════════════════════╪═════════════╪═════════════════╪═══════════════╪═══════════════════╡
+│     0 │ NVIDIA TITAN RTX │ 1809 / 25769 (7.0%) │          34 │              41 │ Graph.: 173   │            26.583 │
+│       │                  │                     │             │                 │ Memory: 403   │                   │
+│       │                  │                     │             │                 │ SM: 173       │                   │
+│       │                  │                     │             │                 │ Video: 540    │                   │
+╘═══════╧══════════════════╧═════════════════════╧═════════════╧═════════════════╧═══════════════╧═══════════════════╛
 ```
+- Watch GPU sensor status: `gpulink sensors -w`  
 
-- Record the memory usage over time, generate a plot and save it as a png image: `gpulink record -o memory.png`
+![Watch sensor status](https://github.com/PhilipKlaus/gpu-link/blob/main/docs/gpulink_sensors_watch.gif)
+
+
+- Record the memory usage over time, generate a plot and save it as a png image: `gpulink record -o memory.png memory`
 
 ```
 ╒═════╤══════════════════╤══════════════════════╕
@@ -147,15 +150,19 @@ with gpu.DeviceCtx(device=DeviceMock) as ctx:
    ...
 ```
 
-## Currently planned features
-
-- Recording arbitrary GPU stats
-- [Curses](https://docs.python.org/3/howto/curses.html) based ui (
-  using [windows-curses](https://pypi.org/project/windows-curses/))
-- Live-plotting of GPU stats
-
 ## Troubleshooting
 
 - If you get the error message below, please ensure that the NVIDIA Management Library is installed on you system by
   typing `nvidia-smi --version` into a terminal:  
   ```pynvml.nvml.NVMLError_LibraryNotFound: NVML Shared Library Not Found```.  
+
+## Planned features
+- Live-plotting of GPU stats
+
+## Changelog 
+- 0.4.0
+    - Recording arbitrary GPU stats (clock, fan-speed, memory, power-usage, temp)
+    - Display GPU name and power usage within `sensors` command
+    - Replaced `arparse` library by [click](https://click.palletsprojects.com/en/8.1.x/)
+    - Aborting a `watch` or `recording` command can be done by pressing any instead of `ctrl+c`
+    - More fancy loading icon
