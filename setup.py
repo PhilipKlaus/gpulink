@@ -52,7 +52,8 @@ setup(
         "matplotlib >= 3.5.1",
         "numpy >= 1.22.2",
         "tabulate >= 0.8.9",
-        "colorama >= 0.4.4"
+        "colorama >= 0.4.4",
+        "click >= 8.1.3"
     ],
     tests_require=tests_require,
     extras_require={"test": tests_require},
