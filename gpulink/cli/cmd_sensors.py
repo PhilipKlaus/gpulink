@@ -41,7 +41,7 @@ class SensorWatcher(StoppableThread):
         click.clear()
         spinner = get_spinner()
         while not self.should_stop:
-            click.echo(f"{self.get_sensor_status()}\n[WATCHING] ", nl=False)
+            click.echo(f"{self.get_sensor_status()}\nPress any key to abort...\n[WATCHING] ", nl=False)
             click.secho(f"{next(spinner)}{set_cursor(1, 1)}", nl=False, fg="green")
             time.sleep(0.1)
         click.clear()
