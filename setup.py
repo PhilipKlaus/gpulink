@@ -48,11 +48,11 @@ setup(
               'gpulink.threading'],
     python_requires=">=3.7",
     install_requires=[
-        "pynvml >= 11.4.1",
-        "matplotlib >= 3.5.1",
-        "numpy >= 1.22.2",
-        "tabulate >= 0.8.9",
-        "colorama >= 0.4.4",
+        "pynvml == 11.5.0",
+        "matplotlib >= 3.7.1",
+        "numpy >= 1.24.3",
+        "tabulate >= 0.9.0",
+        "colorama >= 0.4.6",
         "click >= 8.1.3"
     ],
     tests_require=tests_require,

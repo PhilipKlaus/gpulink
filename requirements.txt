@@ -1,4 +1,4 @@
-pynvml
+pynvml==11.5.0
 matplotlib
 numpy
 tabulate

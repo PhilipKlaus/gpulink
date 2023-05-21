@@ -25,7 +25,7 @@ class LocalNvmlGpu(BaseDevice):
         for dev in self._device_ids:
             handle = nvmlDeviceGetHandleByIndex(dev)
             self._device_handles.append(handle)
-            self._device_names.append(nvmlDeviceGetName(handle).decode("utf-8"))
+            self._device_names.append(nvmlDeviceGetName(handle))
 
     def _execute(self, query, type: Type, gpus: List[int], *args, **kwargs) -> List[QueryResult]:
         if not gpus or len(gpus) == 0:
