@@ -1,5 +1,8 @@
 # gpulink
 
+[![Downloads](https://static.pepy.tech/badge/gpulink/week)](https://pepy.tech/project/gpulink)
+![PythonTest](https://github.com/PhilipKlaus/gpulink/actions/workflows/python-test.yml/badge.svg)
+
 A library and command-line tool for monitoring NVIDIA GPU stats.  
 **gpulink** uses [pynvml](https://github.com/gpuopenanalytics/pynvml) - a Python wrapper for
 the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-library-nvml) (NVML).
