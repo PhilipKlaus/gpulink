@@ -8,7 +8,7 @@ with gpu.DeviceCtx() as ctx:
     print(f"Available GPUs (ids): {ctx.gpus.ids}")
     print(f"Single Memory Info query: {ctx.get_memory_info(ctx.gpus.ids)}")
 
-    # Create recorder and record the amount of used GPU memory for 3 seconds
+    # Create recorder for recording GPU memory
     recorder = gpu.Recorder.create_memory_recorder(
         ctx,
         ctx.gpus.ids,
@@ -16,9 +16,16 @@ with gpu.DeviceCtx() as ctx:
             plot_name="Example Basic",
         )
     )
+
+    # OPTION 1: Record using 'start' and 'stop' methods
     recorder.start()
     time.sleep(3)
     recorder.stop(auto_join=True)
+    recorder.clear()
+
+    # OPTION 2: Record using the context manager
+    with recorder:
+        time.sleep(3)
 
     # Fetch and print recording
     recording = recorder.get_recording()

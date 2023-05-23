@@ -43,8 +43,14 @@ class Recorder(StoppableThread):
         self._gpus = gpus
         self._plot_options = plot_options
         self._echo_function = echo_function
+        self._timeseries = None
+        self.clear()
 
-        self._timeseries = [TimeSeries() for _ in gpus]
+    def __enter__(self):
+        self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop(auto_join=True)
 
     def _get_record(self) -> Tuple[List, List[int]]:
         data = []
@@ -74,6 +80,9 @@ class Recorder(StoppableThread):
             timeseries=self._timeseries,
             plot_options=self._plot_options
         )
+
+    def clear(self) -> None:
+        self._timeseries = [TimeSeries() for _ in self._gpus]
 
     @classmethod
     def create_memory_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
