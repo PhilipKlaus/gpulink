@@ -101,11 +101,21 @@ with gpu.DeviceCtx() as ctx:
 **gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/recording/recorder.py) class
 for recording GPU properties. For simple instantiation use one of the provided factory methods, e.g.:
 
+```recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus.ids)```
+
+Afterwards a recording can be performed:
+
+#### Option 1: Using `start` and `stop` method 
 ```
-    recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
     recorder.start()
     ... # Do some GPU stuff
     recorder.stop(auto_join=True)
+```
+
+#### Option 2: Using a context manager
+```
+    with recorder:
+    ... # Do some GPU stuff
 ```
 
 Once a recording is finished its data can be accessed:
