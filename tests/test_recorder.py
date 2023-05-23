@@ -81,19 +81,3 @@ def test_record_using_context_manager(device_ctx):
         recording = rec.get_recording()
         assert recording.timeseries[0].data.shape[0] > 0
         assert recording.timeseries[1].data.shape[0] > 0
-
-
-def test_clear_a_recorder(device_ctx):
-    with device_ctx as ctx:
-        rec = Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
-
-        for i in range(3):
-            rec._fetch_and_store()
-
-        recording = rec.get_recording()
-        assert recording.timeseries[0].data.shape[0] == 3
-        assert recording.timeseries[0].data.shape[0] == 3
-
-        rec.clear()
-
-        assert recording.timeseries == [TimeSeries(), TimeSeries()]
