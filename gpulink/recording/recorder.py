@@ -43,8 +43,13 @@ class Recorder(StoppableThread):
         self._gpus = gpus
         self._plot_options = plot_options
         self._echo_function = echo_function
+        self._timeseries = [TimeSeries() for _ in self._gpus]
 
-        self._timeseries = [TimeSeries() for _ in gpus]
+    def __enter__(self):
+        self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop(auto_join=True)
 
     def _get_record(self) -> Tuple[List, List[int]]:
         data = []

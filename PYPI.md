@@ -138,3 +138,5 @@ with gpu.DeviceCtx(device=DeviceMock) as ctx:
     - Display GPU name and power usage within `sensors` command
     - Replaced `arparse` library by [click](https://click.palletsprojects.com/en/8.1.x/)
     - Aborting a `watch` or `recording` command can be done by pressing any instead of `ctrl+c`
+- **0.4.1**
+    - Fix error when calling `nvmlDeviceGetName` in `pynvml` version *11.5.0* 

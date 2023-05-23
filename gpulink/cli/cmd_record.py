@@ -12,7 +12,7 @@ from gpulink.recording.gpu_recording import Recording
 
 
 def _echo(spinner: cycle):
-    click.echo("[RECORDING] ", nl=False)
+    click.echo("Press any key to abort...\n[RECORDING] ", nl=False)
     click.secho(f"{next(spinner)}{set_cursor(1, 1)}", nl=False, fg="green")
 
 
@@ -52,10 +52,9 @@ def _handle_record(rec_options: _RecOptions, factory_method: Callable, gpus: Opt
     with DeviceCtx() as ctx:
         gpus = gpus if gpus else ctx.gpus.ids
         recorder = factory_method(ctx, gpus, echo_function=lambda: _echo(rec_options.spinner))
-        recorder.start()
-        click.clear()
-        click.pause(info="")
-        recorder.stop(auto_join=True)
+        with recorder:
+            click.clear()
+            click.pause(info="")
         click.clear()
         recording = recorder.get_recording()
         click.echo(recording)

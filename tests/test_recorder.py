@@ -4,8 +4,8 @@ import pytest
 
 from gpulink import DeviceCtx, Recorder
 from gpulink.consts import MB
-from gpulink.recording.timeseries import TimeSeries
 from gpulink.plotting.plot_options import PlotOptions
+from gpulink.recording.timeseries import TimeSeries
 from tests.device_mock import DeviceMock, TEST_GB
 
 
@@ -64,3 +64,20 @@ def test_recorder_thread_with_custom_plot_options(device_ctx):
         rec.stop(auto_join=True)
 
         assert rec.get_recording().plot_options == options
+
+
+def test_record_using_context_manager(device_ctx):
+    with device_ctx as ctx:
+        rec = Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
+
+        # Ensure that the recording is empty at the beginning
+        recording = rec.get_recording()
+        assert recording.timeseries == [TimeSeries(), TimeSeries()]
+
+        with rec:
+            time.sleep(1)
+
+        # Ensure that the recording is not empty after recording for 1 second
+        recording = rec.get_recording()
+        assert recording.timeseries[0].data.shape[0] > 0
+        assert recording.timeseries[1].data.shape[0] > 0
