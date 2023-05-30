@@ -5,6 +5,7 @@ import pytest
 from gpulink import DeviceCtx, Recorder
 from gpulink.consts import MB
 from gpulink.plotting.plot_options import PlotOptions
+from gpulink.recording.recorder import record
 from gpulink.recording.timeseries import TimeSeries
 from tests.device_mock import DeviceMock, TEST_GB
 
@@ -81,3 +82,19 @@ def test_record_using_context_manager(device_ctx):
         recording = rec.get_recording()
         assert recording.timeseries[0].data.shape[0] > 0
         assert recording.timeseries[1].data.shape[0] > 0
+
+
+def test_record_using_record_decorator():
+    options = PlotOptions(plot_name="Decorator Record")
+
+    @record(ctx_class=DeviceMock, factory=Recorder.create_memory_recorder, gpus=None, plot_options=options)
+    def my_heavy_gpu_function(a: int, b: int):
+        time.sleep(1)
+        return a + b
+
+    # Ensure that a recording is returned and that it is not empty
+    result = my_heavy_gpu_function(a=10, b=20)
+    assert result.value == 30
+    assert result.recording.timeseries[0].data.shape[0] > 0
+    assert result.recording.timeseries[1].data.shape[0] > 0
+    assert result.recording.plot_options.plot_name == "Decorator Record"
