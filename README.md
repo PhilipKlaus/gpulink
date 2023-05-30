@@ -107,8 +107,7 @@ recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
 
 Afterwards a recording can be performed:
 
-#### Option 1: Using `start` and `stop` method (see
-[Basic example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_basic.py))
+#### Option 1: Using `start` and `stop` method (see [Basic example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_basic.py))
 
 ``` python
     recorder.start()
@@ -116,16 +115,14 @@ Afterwards a recording can be performed:
     recorder.stop(auto_join=True)
 ```
 
-#### Option 2: Using a context manager (see
-[Context-Manager example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_context_manager.py))
+#### Option 2: Using a context manager (see [Context-Manager example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_context_manager.py))
 
 ``` python
     with recorder:
     ... # Do some GPU stuff
 ```
 
-#### Option 3: Using a decorator (see
-[Decorator example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_decorator.py))
+#### Option 3: Using a decorator (see [Decorator example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_decorator.py))
 
 ``` python
     @record(factory=gpu.Recorder.create_memory_recorder)

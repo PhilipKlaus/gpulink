@@ -225,6 +225,14 @@ class RecWrapper:
 
 
 def record(ctx_class=LocalNvmlGpu, factory=Callable[[Any], Recorder], gpus: List[int] = None, **kwargs_record):
+    """
+    A decorator for recording GPU stats.
+    :param ctx_class: The GPU device context (default: LocalNvmlGpu).
+    :param factory: The factory method used for instantiating the recorder.
+    :param gpus: A list of GPU ids to be recorded from.
+    :param kwargs_record: Additional keyword argument for  the factory method (e.g. plot_options)
+    :return: Wrapped function.
+    """
     def record_inner(fn):
         @wraps(fn)
         def wrapped(*args, **kwargs) -> RecWrapper:
