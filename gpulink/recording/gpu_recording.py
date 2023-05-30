@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 from tabulate import tabulate
 
-from gpulink.consts import SEC
+from gpulink.consts import SEC, RecType
 from gpulink.devices.gpu import GpuSet
-from gpulink.plotting.plot_options import PlotOptions
 from gpulink.recording.timeseries import TimeSeries
 
 
@@ -20,17 +19,18 @@ class Recording:
     """
     gpus: GpuSet  # The recorded Gpu devices
     timeseries: List[TimeSeries]  # The recorded time series data
-    plot_options: Optional[PlotOptions] = None  # Optional Plot options
+    rec_type: RecType
+    rec_name: str
 
     def _create_data_table(self):
-        table = [["GPU", "Name", f"{self.plot_options.y_axis_label} [{self.plot_options.y_axis_unit}]"]]
+        table = [["GPU", "Name", f"{self.rec_name} ({self.rec_type.value})"]]
         for gpu, timeseries in zip(self.gpus, self.timeseries):
             data = timeseries.data
             table.append(
                 [gpu.id,
                  gpu.name,
-                 f"minimum: {np.min(data) / self.plot_options.y_axis_divider}\n"
-                 f"maximum: {np.max(data) / self.plot_options.y_axis_divider} "
+                 f"minimum: {np.min(data)}\n"
+                 f"maximum: {np.max(data)} "
                  ]
             )
         return tabulate(table, tablefmt='fancy_grid')

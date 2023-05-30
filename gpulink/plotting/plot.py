@@ -34,9 +34,6 @@ class Plot:
             y_axis_unit=None
         )
 
-        if self._recording.plot_options:
-            self._plot_options.patch(self._recording.plot_options)
-
     def _describe_plot(self, ax):
         ax.set_title(self._plot_options.plot_name)
         ax.legend(loc="upper left")

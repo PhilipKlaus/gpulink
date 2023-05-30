@@ -11,9 +11,7 @@ with gpu.DeviceCtx() as ctx:
     recorder = gpu.Recorder.create_memory_recorder(
         ctx,
         ctx.gpus.ids,
-        plot_options=gpu.PlotOptions(
-            plot_name="Example Basic",
-        )
+        name="Example Basic"
     )
     recorder.start()
     time.sleep(3)
