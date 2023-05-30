@@ -3,11 +3,7 @@ import time
 import gpulink as gpu
 
 with gpu.DeviceCtx() as ctx:
-    print(f"Available GPUs (names): {ctx.gpus.names}")
-    print(f"Available GPUs (ids): {ctx.gpus.ids}")
-    print(f"Single Memory Info query: {ctx.get_memory_info(ctx.gpus.ids)}")
-
-    # Record using 'start' and 'stop' methods
+    # Record using the context manager
     recorder = gpu.Recorder.create_memory_recorder(
         ctx,
         ctx.gpus.ids,
@@ -15,9 +11,10 @@ with gpu.DeviceCtx() as ctx:
             plot_name="Example Basic",
         )
     )
-    recorder.start()
-    time.sleep(3)
-    recorder.stop(auto_join=True)
+
+    # This simulates GPU work
+    with recorder:
+        time.sleep(3)
 
     # Fetch and print recording
     recording = recorder.get_recording()

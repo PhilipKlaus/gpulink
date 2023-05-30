@@ -1,10 +1,13 @@
+from dataclasses import dataclass
+from functools import wraps
 from time import perf_counter
-from typing import List, Callable, Tuple, Union, Optional
+from typing import List, Callable, Tuple, Union, Optional, Any
 
 from gpulink import DeviceCtx
 from gpulink.consts import MB, WATTS
 from gpulink.devices.gpu import GpuSet
 from gpulink.devices.nvml_defines import TemperatureSensorType, ClockType
+from gpulink.devices.nvml_device import LocalNvmlGpu
 from gpulink.devices.query import QueryResult
 from gpulink.plotting.plot_options import PlotOptions
 from gpulink.recording.gpu_recording import Recording
@@ -213,3 +216,25 @@ class Recorder(StoppableThread):
     def create_memory_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], plot_options: Optional[PlotOptions] = None,
                                      echo_function: EchoFunction = None):
         return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_MEM, plot_options, echo_function)
+
+
+@dataclass
+class RecWrapper:
+    value: Any
+    recording: Recording
+
+
+def record(ctx_class=LocalNvmlGpu, factory=Callable[[Any], Recorder], gpus: List[int] = None, **kwargs_record):
+    def record_inner(fn):
+        @wraps(fn)
+        def wrapped(*args, **kwargs) -> RecWrapper:
+            with DeviceCtx(device=ctx_class) as ctx:
+                used_gpus = ctx.gpus.ids if not gpus else gpus
+                recorder = factory(ctx, used_gpus, **kwargs_record)
+                with recorder:
+                    ret_val = fn(*args, **kwargs)
+                return RecWrapper(value=ret_val, recording=recorder.get_recording())
+
+        return wrapped
+
+    return record_inner
