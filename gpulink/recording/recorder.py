@@ -3,17 +3,36 @@ from functools import wraps
 from time import perf_counter
 from typing import List, Callable, Tuple, Union, Optional, Any
 
+import numpy as np
+
 from gpulink import DeviceCtx
-from gpulink.consts import RecType
 from gpulink.devices.gpu import GpuSet
 from gpulink.devices.nvml_defines import TemperatureSensorType, ClockType
 from gpulink.devices.nvml_device import LocalNvmlGpu
 from gpulink.devices.query import QueryResult
-from gpulink.recording.gpu_recording import Recording
+from gpulink.recording.gpu_recording import Recording, RecType
 from gpulink.recording.timeseries import TimeSeries
 from gpulink.threading.stoppable_thread import StoppableThread
 
 EchoFunction = Optional[Callable[[], None]]
+
+
+@dataclass
+class _Recording:
+    def __init__(self):
+        self._timestamps = []
+        self._data = []
+
+    def add_record(self, timestamp, data):
+        self._timestamps.append(timestamp)
+        self._data.append(data)
+
+    def to_timeseries(self) -> TimeSeries:
+        return TimeSeries(
+            timestamps=np.array(self._timestamps),
+            data=np.array(self._data)
+        )
+
 
 
 class Recorder(StoppableThread):
@@ -23,20 +42,22 @@ class Recorder(StoppableThread):
             cmd: Callable[[DeviceCtx], List[QueryResult]],
             res_filter: Callable[[QueryResult], Union[int, float, str]],
             ctx: DeviceCtx,
-            gpus: List[int],
-            rec_type: RecType,
-            rec_name: Optional[str] = None,
+            rtype: RecType,
+            runit: str,
+            gpus: Optional[List[int]] = None,
+            name: Optional[str] = None,
             echo_function: EchoFunction = None
     ):
         super().__init__()
         self._cmd = cmd
         self._filter = res_filter
         self._ctx = ctx
-        self._gpus = gpus
-        self._rec_type = rec_type
-        self._rec_name = rec_name if rec_name else "Recording"
+        self._gpus = gpus if gpus else ctx.gpus.ids
+        self._rtype = rtype
+        self._runit = runit
+        self._name = name if name else "GPULink Recording"
         self._echo_function = echo_function
-        self._timeseries = [TimeSeries() for _ in self._gpus]
+        self._recordings = [_Recording() for _ in self._gpus]
 
     def __enter__(self):
         self.start()
@@ -55,7 +76,7 @@ class Recorder(StoppableThread):
     def _fetch_and_store(self):
         timestamps, data = self._get_record()
         for idx, record in enumerate(zip(timestamps, data)):
-            self._timeseries[idx].add_record(record[0], record[1])
+            self._recordings[idx].add_record(record[0], record[1])
 
     def run(self):
         old_time = 0
@@ -69,12 +90,13 @@ class Recorder(StoppableThread):
     def get_recording(self) -> Recording:
         return Recording(
             gpus=GpuSet([self._ctx.gpus[idx] for idx in self._gpus]),
-            timeseries=self._timeseries,
-            rec_type=self._rec_type,
-            rec_name=self._rec_name)
+            timeseries=[r.to_timeseries() for r in self._recordings],
+            rtype=self._rtype,
+            name=self._name,
+            unit=self._runit)
 
     @classmethod
-    def create_memory_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
+    def create_memory_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]] = None, name: Optional[str] = None,
                                echo_function: EchoFunction = None):
 
         return cls(
@@ -82,13 +104,14 @@ class Recorder(StoppableThread):
             res_filter=lambda res: res.used,
             ctx=ctx,
             gpus=gpus,
-            rec_type=RecType.REC_TYPE_MEMORY,
-            rec_name=name,
+            rtype=RecType.REC_TYPE_MEMORY,
+            runit="Byte",
+            name=name,
             echo_function=echo_function
         )
 
     @classmethod
-    def create_temperature_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
+    def create_temperature_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]] = None, name: Optional[str] = None,
                                     echo_function: EchoFunction = None):
 
         return cls(
@@ -96,13 +119,14 @@ class Recorder(StoppableThread):
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,
-            rec_type=RecType.REC_TYPE_TEMPERATURE,
-            rec_name=name,
+            rtype=RecType.REC_TYPE_TEMPERATURE,
+            runit="°C",
+            name=name,
             echo_function=echo_function
         )
 
     @classmethod
-    def create_fan_speed_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
+    def create_fan_speed_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]] = None, name: Optional[str] = None,
                                   echo_function: EchoFunction = None):
 
         return cls(
@@ -110,13 +134,14 @@ class Recorder(StoppableThread):
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,
-            rec_type=RecType.REC_TYPE_FAN_SPEED,
-            rec_name=name,
+            rtype=RecType.REC_TYPE_FAN_SPEED,
+            runit="%",
+            name=name,
             echo_function=echo_function
         )
 
     @classmethod
-    def create_power_usage_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
+    def create_power_usage_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]] = None, name: Optional[str] = None,
                                     echo_function: EchoFunction = None):
 
         return cls(
@@ -124,14 +149,15 @@ class Recorder(StoppableThread):
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,
-            rec_type=RecType.REC_TYPE_POWER_USAGE,
-            rec_name=name,
+            rtype=RecType.REC_TYPE_POWER_USAGE,
+            runit="W",
+            name=name,
             echo_function=echo_function
         )
 
     @classmethod
-    def create_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], clock_type: ClockType, name: Optional[str] = None,
-                              echo_function: EchoFunction = None):
+    def create_clock_recorder(cls, ctx: DeviceCtx, clock_type: ClockType, gpus: Optional[List[int]] = None,
+                              name: Optional[str] = None, echo_function: EchoFunction = None):
 
         clock_type_map = {
             ClockType.CLOCK_SM: RecType.REC_TYPE_CLOCK_SM,
@@ -145,30 +171,53 @@ class Recorder(StoppableThread):
             res_filter=lambda res: res.value,
             ctx=ctx,
             gpus=gpus,
-            rec_type=clock_type_map[clock_type],
-            rec_name=name,
+            rtype=clock_type_map[clock_type],
+            runit="MHz",
+            name=name,
             echo_function=echo_function
         )
 
     @classmethod
-    def create_graphics_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
-                                       echo_function: EchoFunction = None):
-        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_GRAPHICS, name, echo_function)
+    def create_graphics_clock_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]] = None,
+                                       name: Optional[str] = None, echo_function: EchoFunction = None):
+        return cls.create_clock_recorder(ctx, ClockType.CLOCK_GRAPHICS, gpus, name, echo_function)
 
     @classmethod
-    def create_video_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
+    def create_video_clock_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]], name: Optional[str] = None,
                                     echo_function: EchoFunction = None):
-        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_VIDEO, name, echo_function)
+        return cls.create_clock_recorder(ctx, ClockType.CLOCK_VIDEO, gpus, name, echo_function)
 
     @classmethod
-    def create_sm_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
+    def create_sm_clock_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]], name: Optional[str] = None,
                                  echo_function: EchoFunction = None):
-        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_SM, name, echo_function)
+        return cls.create_clock_recorder(ctx, ClockType.CLOCK_SM, gpus, name, echo_function)
 
     @classmethod
-    def create_memory_clock_recorder(cls, ctx: DeviceCtx, gpus: List[int], name: Optional[str] = None,
+    def create_memory_clock_recorder(cls, ctx: DeviceCtx, gpus: Optional[List[int]], name: Optional[str] = None,
                                      echo_function: EchoFunction = None):
-        return cls.create_clock_recorder(ctx, gpus, ClockType.CLOCK_MEM, name, echo_function)
+        return cls.create_clock_recorder(ctx, ClockType.CLOCK_MEM, gpus, name, echo_function)
+
+    @classmethod
+    def create_recorder(cls, ctx: DeviceCtx, rtype: RecType, gpus: Optional[List[int]] = None,
+                        name: Optional[str] = None, echo_function: EchoFunction = None):
+        if rtype == RecType.REC_TYPE_TEMPERATURE:
+            return Recorder.create_temperature_recorder(ctx, gpus, name, echo_function)
+        elif rtype == RecType.REC_TYPE_CLOCK_SM:
+            return Recorder.create_sm_clock_recorder(ctx, gpus, name, echo_function)
+        elif rtype == RecType.REC_TYPE_CLOCK_VIDEO:
+            return Recorder.create_video_clock_recorder(ctx, gpus, name, echo_function)
+        elif rtype == RecType.REC_TYPE_CLOCK_GRAPHICS:
+            return Recorder.create_graphics_clock_recorder(ctx, gpus, name, echo_function)
+        elif rtype == RecType.REC_TYPE_CLOCK_MEM:
+            return Recorder.create_memory_clock_recorder(ctx, gpus, name, echo_function)
+        elif rtype == RecType.REC_TYPE_FAN_SPEED:
+            return Recorder.create_fan_speed_recorder(ctx, gpus, name, echo_function)
+        elif rtype == RecType.REC_TYPE_MEMORY:
+            return Recorder.create_memory_recorder(ctx, gpus, name, echo_function)
+        elif rtype == RecType.REC_TYPE_POWER_USAGE:
+            return Recorder.create_power_usage_recorder(ctx, gpus, name, echo_function)
+        else:
+            raise ValueError(f"Invalid RecType provided")
 
 
 @dataclass
@@ -177,15 +226,15 @@ class RecWrapper:
     recording: Recording
 
 
-def record(ctx_class=LocalNvmlGpu, factory=Callable[[Any], Recorder], gpus: List[int] = None, name: str = None,
-           **kwargs_record):
+def record(rtype: RecType, ctx_class=LocalNvmlGpu, gpus: Optional[List[int]] = None, name: str = None,
+           echo_function: EchoFunction = None):
     """
     A decorator for recording GPU stats.
+    :param rtype: Specifies the recorder type.
     :param ctx_class: The GPU device context (default: LocalNvmlGpu).
-    :param factory: The factory method used for instantiating the recorder.
     :param gpus: A list of GPU ids to be recorded from.
     :param name: An optional name for the recording. If not provided __name__ of the decorated function is used.
-    :param kwargs_record: Additional keyword argument for  the factory method (e.g. plot_options)
+    :param echo_function: An optional echo function which is called after recording a data frame.
     :return: Wrapped function.
     """
 
@@ -194,8 +243,7 @@ def record(ctx_class=LocalNvmlGpu, factory=Callable[[Any], Recorder], gpus: List
         def wrapped(*args, **kwargs) -> RecWrapper:
             with DeviceCtx(device=ctx_class) as ctx:
                 rec_name = name if name else fn.__name__
-                used_gpus = ctx.gpus.ids if not gpus else gpus
-                recorder = factory(ctx, used_gpus, rec_name, **kwargs_record)
+                recorder = Recorder.create_recorder(ctx, rtype, gpus, rec_name, echo_function)
                 with recorder:
                     ret_val = fn(*args, **kwargs)
                 return RecWrapper(value=ret_val, recording=recorder.get_recording())

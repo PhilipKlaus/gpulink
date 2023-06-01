@@ -10,7 +10,6 @@ with gpu.DeviceCtx() as ctx:
     # Record using 'start' and 'stop' methods
     recorder = gpu.Recorder.create_memory_recorder(
         ctx,
-        ctx.gpus.ids,
         name="Example Basic"
     )
     recorder.start()

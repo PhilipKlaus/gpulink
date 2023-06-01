@@ -6,7 +6,6 @@ with gpu.DeviceCtx() as ctx:
     # Record using the context manager
     recorder = gpu.Recorder.create_memory_recorder(
         ctx,
-        ctx.gpus.ids,
         name="Example Context Manager"
     )
 
