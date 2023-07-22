@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 
 from gpulink import DeviceCtx, Plot, Recorder
 from gpulink.cli.console import get_spinner, set_cursor
+from gpulink.consts import MB
 from gpulink.recording.gpu_recording import Recording
 
 
@@ -57,6 +58,11 @@ def _handle_record(rec_options: _RecOptions, factory_method: Callable, gpus: Opt
             click.pause(info="")
         click.clear()
         recording = recorder.get_recording()
+
+        # If memory was recorded: convert the output to MB per default
+        if factory_method == Recorder.create_memory_recorder:
+            recording.convert(MB, "MB")
+
         click.echo(recording)
 
     if rec_options.output:
