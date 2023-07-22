@@ -4,7 +4,7 @@ import gpulink as gpu
 
 
 # Use a decorator for recording with standard settings:
-@gpu.record(rtype=gpu.RecType.REC_TYPE_MEMORY)
+@gpu.record(rtype=gpu.RecType.REC_TYPE_MEMORY, ctx_class=gpu.DeviceMock)
 def my_gpu_function(a: int, b: int):
     time.sleep(3)
     return a + b

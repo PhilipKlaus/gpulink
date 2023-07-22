@@ -2,7 +2,7 @@ import time
 
 import gpulink as gpu
 
-with gpu.DeviceCtx() as ctx:
+with gpu.DeviceCtx(device=gpu.DeviceMock) as ctx:
     # Record using the context manager
     recorder = gpu.Recorder.create_memory_recorder(
         ctx,

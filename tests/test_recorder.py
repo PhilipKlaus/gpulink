@@ -8,7 +8,7 @@ from gpulink.devices.gpu import Gpu, GpuSet
 from gpulink.recording.gpu_recording import RecType, Recording
 from gpulink.recording.recorder import record
 from gpulink.recording.timeseries import TimeSeries
-from tests.device_mock import DeviceMock, TEST_GB
+from gpulink.devices.device_mock import DeviceMock, TEST_GB
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def assert_timeseries_not_empty(recording: Recording):
 def test_get_record(device_ctx):
     with device_ctx as ctx:
         rec = Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
-        assert rec._get_record() == ([0, 0], [TEST_GB // 2, TEST_GB // 2])
+        assert rec._get_record() == ([0, 0], [TEST_GB // 2, TEST_GB // 4])
 
 
 def test_fetch_and_return_data(device_ctx):
@@ -40,8 +40,8 @@ def test_fetch_and_return_data(device_ctx):
         assert data.name == "GPULink Recording"
 
         assert data.timeseries == [
-            TimeSeries(np.array([0, 0, 0]), np.array([TEST_GB // 2, TEST_GB // 2, TEST_GB // 2])),
-            TimeSeries(np.array([0, 0, 0]), np.array([TEST_GB // 2, TEST_GB // 2, TEST_GB // 2]))
+            TimeSeries(np.array([0, 1, 2]), np.array([TEST_GB // 2, TEST_GB // 2, TEST_GB // 2])),
+            TimeSeries(np.array([0, 1, 2]), np.array([TEST_GB // 4, TEST_GB // 4, TEST_GB // 4]))
         ]
 
 

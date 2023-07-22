@@ -2,7 +2,7 @@ import time
 
 import gpulink as gpu
 
-with gpu.DeviceCtx() as ctx:
+with gpu.DeviceCtx(device=gpu.DeviceMock) as ctx:
     print(f"Available GPUs (names): {ctx.gpus.names}")
     print(f"Available GPUs (ids): {ctx.gpus.ids}")
     print(f"Single Memory Info query: {ctx.get_memory_info(ctx.gpus.ids)}")

@@ -1,6 +1,6 @@
 import gpulink as gpu
 
-with gpu.DeviceCtx() as ctx:
+with gpu.DeviceCtx(device=gpu.DeviceMock) as ctx:
     ctx.get_memory_info(gpus=ctx.gpus.ids),
     ctx.get_fan_speed(gpus=ctx.gpus.ids),
     ctx.get_temperature(gpu.TemperatureSensorType.GPU, gpus=ctx.gpus.ids),
