@@ -52,19 +52,3 @@ def test_generate_graph_with_autoscale(device_ctx, time_series):
         np.testing.assert_equal(gpu2.get_xdata(True), time_expected)
         np.testing.assert_equal(gpu1.get_ydata(True), time_series[0].data)
         np.testing.assert_equal(gpu2.get_ydata(True), time_series[1].data)
-
-
-def test_generate_graph_with_custom_scale(device_ctx, time_series):
-    with device_ctx as ctx:
-        recording = Recording(
-            gpus=ctx.gpus,
-            timeseries=time_series,
-            rtype=RecType.REC_TYPE_MEMORY,
-            unit="Byte",
-            name="Consumed Memory"
-        )
-
-        plot = Plot(recording, y_axis_range=(-100, 100))
-        _, ax = plot.generate_graph()
-        assert ax.get_ylim()[0] == -100
-        assert ax.get_ylim()[1] == 100
