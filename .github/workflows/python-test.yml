@@ -40,7 +40,7 @@ jobs:
           MPLBACKEND: Agg
         run: |
           export PYTHONPATH=.:$PYTHONPATH
-          cd examples
+          cd example
           python example_api.py mock
           python example_basic.py mock
           python example_context_manager.py mock
