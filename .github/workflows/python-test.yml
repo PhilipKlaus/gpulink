@@ -38,8 +38,10 @@ jobs:
       - name: Test examples
         env:
           MPLBACKEND: Agg
-          PYTHONPATH: .
         run: |
+          PWD=$(pwd)
+          export PYTHONPATH=$PWD:$PYTHONPATH
+          echo "PYTHONPATH=$PYTHONPATH"
           cd example
           python example_api.py mock
           python example_basic.py mock
