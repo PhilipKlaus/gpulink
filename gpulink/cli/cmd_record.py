@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from itertools import cycle
 from pathlib import Path
+from time import perf_counter
 from typing import Callable, Optional, List
 
 import click
@@ -12,15 +13,29 @@ from gpulink.consts import MB
 from gpulink.recording.gpu_recording import Recording
 
 
-def _echo(spinner: cycle):
-    click.echo("Press any key to abort...\n[RECORDING] ", nl=False)
-    click.secho(f"{next(spinner)}{set_cursor(1, 1)}", nl=False, fg="green")
+class Callback:
+    def __init__(self, spinner: cycle):
+        self._spinner = spinner
+        self._last_ts = 0
+
+    def echo(self, _, __):
+        def _echo(spinner: cycle):
+            click.echo("Press any key to abort...\n[RECORDING] ", nl=False)
+            click.secho(f"{next(spinner)}{set_cursor(1, 1)}", nl=False, fg="green")
+
+        ts = perf_counter()
+        if ts - self._last_ts > 0.10:
+            _echo(self._spinner)
+            self._last_ts = ts
+
+
+# Global variable to store the actual recording callback
+_callback: Optional[Callback] = None
 
 
 @dataclass
 class _RecOptions:
     plot: bool
-    autoscale: bool
     output: Optional[Path] = None
     spinner = get_spinner()
 
@@ -38,21 +53,21 @@ def _check_output_file_type(output_path: Path) -> bool:
 
 
 def _store_records(recording: Recording, rec_options: _RecOptions):
-    recording.plot_options.auto_scale = rec_options.autoscale
     graph = Plot(recording)
     graph.save(rec_options.output)
 
 
-def _display_plot(recording: Recording, rec_options: _RecOptions):
-    recording.plot_options.auto_scale = rec_options.autoscale
+def _display_plot(recording: Recording):
     p = Plot(recording)
     p.plot()
 
 
 def _handle_record(rec_options: _RecOptions, factory_method: Callable, gpus: Optional[List[int]] = None):
+    global _callback
     with DeviceCtx() as ctx:
         gpus = gpus if gpus else ctx.gpus.ids
-        recorder = factory_method(ctx, gpus, echo_function=lambda: _echo(rec_options.spinner))
+        _callback = Callback(rec_options.spinner)
+        recorder = factory_method(ctx, gpus, callback=_callback.echo)
         with recorder:
             click.clear()
             click.pause(info="")
@@ -68,15 +83,14 @@ def _handle_record(rec_options: _RecOptions, factory_method: Callable, gpus: Opt
     if rec_options.output:
         _store_records(recording, rec_options)
     if rec_options.plot:
-        _display_plot(recording, rec_options)
+        _display_plot(recording)
 
 
 @click.group()
 @click.option('--plot', '-p', is_flag=True, help="Displays a plot of the recorded GPU property over time.")
 @click.option('--output', '-o', type=click.Path(), default=None, help="File path to store the GPU plot.")
-@click.option('--no-autoscale', is_flag=True, help="Disable auto-scaling of the y axis in the plot.")
 @click.pass_context
-def record(ctx, plot: bool, output: str, no_autoscale: bool) -> None:
+def record(ctx, plot: bool, output: str) -> None:
     """
     Record GPU properties.
 
@@ -84,7 +98,6 @@ def record(ctx, plot: bool, output: str, no_autoscale: bool) -> None:
     :param ctx: The Command context.
     :param plot: If true, a plot of the recorded GPU property is displayed.
     :param output: File path to store the GPU plot.
-    :param no_autoscale: if true, auto-scaling of the y axis in the plot is disabled.
     :return: None
     """
     if output:
@@ -94,7 +107,6 @@ def record(ctx, plot: bool, output: str, no_autoscale: bool) -> None:
 
     ctx.obj = _RecOptions(
         plot=plot,
-        autoscale=not no_autoscale,
         output=output
     )
 

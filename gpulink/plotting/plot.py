@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple, Optional, Union
+from typing import Tuple, Union
 
 from matplotlib import pyplot as plt
 from matplotlib.axis import Axis
@@ -23,11 +23,8 @@ class Plot:
     Plots recorded GPU properties over time.
     """
 
-    def __init__(self, recording: Recording, y_axis_range: Optional[Tuple[DATA, DATA]] = None,
-                 auto_scale: Optional[bool] = False):
+    def __init__(self, recording: Recording):
         self._recording = recording
-        self._y_axis_range = y_axis_range
-        self._auto_scale = auto_scale
 
     def _describe_plot(self, ax):
         ax.set_title(self._recording.name)
@@ -54,10 +51,6 @@ class Plot:
             y_axis = data.data
 
             ax.plot(x_axis, y_axis, label=f"{gpu.name} [{gpu.id}]")
-
-        if not self._auto_scale and self._y_axis_range:
-            ax.set_ylim([self._y_axis_range[0], self._y_axis_range[1]])
-        else:
             ax.autoscale()
 
         self._describe_plot(ax)
