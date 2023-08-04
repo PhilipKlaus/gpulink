@@ -2,7 +2,7 @@ import time
 
 import gpulink as gpu
 
-with gpu.DeviceCtx() as ctx:
+with gpu.DeviceCtx(device=gpu.DeviceMock) as ctx:
     print(f"Available GPUs (names): {ctx.gpus.names}")
     print(f"Available GPUs (ids): {ctx.gpus.ids}")
     print(f"Single Memory Info query: {ctx.get_memory_info(ctx.gpus.ids)}")
@@ -10,10 +10,7 @@ with gpu.DeviceCtx() as ctx:
     # Record using 'start' and 'stop' methods
     recorder = gpu.Recorder.create_memory_recorder(
         ctx,
-        ctx.gpus.ids,
-        plot_options=gpu.PlotOptions(
-            plot_name="Example Basic",
-        )
+        name="Example Basic"
     )
     recorder.start()
     time.sleep(3)

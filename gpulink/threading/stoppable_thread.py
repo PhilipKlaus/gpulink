@@ -6,7 +6,7 @@ class StoppableThread(Thread):
         super().__init__()
         self._stop_event = Event()
 
-    def stop(self, auto_join=False) -> None:
+    def stop(self, auto_join=True) -> None:
         self._stop_event.set()
         if auto_join:
             self.join()

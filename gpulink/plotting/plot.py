@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
 
 from matplotlib import pyplot as plt
 from matplotlib.axis import Axis
@@ -7,13 +7,15 @@ from matplotlib.figure import Figure
 
 from gpulink.consts import SEC
 from gpulink.recording.gpu_recording import Recording
-from .plot_options import PlotOptions
 
 
 def _clean_matplotlib():
     plt.clf()
     plt.cla()
     plt.close()
+
+
+DATA = Union[int, float]
 
 
 class Plot:
@@ -23,25 +25,11 @@ class Plot:
 
     def __init__(self, recording: Recording):
         self._recording = recording
-        self._patch_plot_options()
-
-    def _patch_plot_options(self):
-        self._plot_options = PlotOptions(
-            plot_name="GPULink Recording",
-            y_axis_label=None,
-            y_axis_divider=1,
-            y_axis_range=None,
-            y_axis_unit=None
-        )
-
-        if self._recording.plot_options:
-            self._plot_options.patch(self._recording.plot_options)
 
     def _describe_plot(self, ax):
-        ax.set_title(self._plot_options.plot_name)
+        ax.set_title(self._recording.name)
         ax.legend(loc="upper left")
-        if self._plot_options.y_axis_label:
-            ax.set_ylabel(f"{self._plot_options.y_axis_label} [{self._plot_options.y_axis_unit}]")
+        ax.set_ylabel(f"{self._recording.rtype.value} [{self._recording.unit}]")
         ax.set_xlabel("Time [s]")
 
     def generate_graph(self) -> Tuple[Figure, Axis]:
@@ -60,15 +48,9 @@ class Plot:
                 raise ValueError("Recorded timestamps and data must be of same shape")
 
             x_axis = (data.timestamps - data.timestamps[0]) / SEC
-            y_axis = data.data / self._plot_options.y_axis_divider
+            y_axis = data.data
 
             ax.plot(x_axis, y_axis, label=f"{gpu.name} [{gpu.id}]")
-
-        if not self._plot_options.auto_scale and self._plot_options.y_axis_range:
-            min_val = self._plot_options.y_axis_range[0] / self._plot_options.y_axis_divider
-            max_val = self._plot_options.y_axis_range[1] / self._plot_options.y_axis_divider
-            ax.set_ylim([min_val, max_val])
-        else:
             ax.autoscale()
 
         self._describe_plot(ax)
