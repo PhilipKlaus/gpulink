@@ -147,7 +147,7 @@ class Recorder(StoppableThread):
             ctx=ctx,
             gpus=gpus,
             rtype=RecType.REC_TYPE_POWER_USAGE,
-            runit="W",
+            runit="mW",
             name=name,
             callback=callback
         )
