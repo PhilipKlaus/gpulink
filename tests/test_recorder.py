@@ -111,7 +111,7 @@ unit_map = {
     gpu.RecType.REC_TYPE_CLOCK_SM: "MHz",
     gpu.RecType.REC_TYPE_CLOCK_MEM: "MHz",
     gpu.RecType.REC_TYPE_CLOCK_VIDEO: "MHz",
-    gpu.RecType.REC_TYPE_POWER_USAGE: "W",
+    gpu.RecType.REC_TYPE_POWER_USAGE: "mW",
     gpu.RecType.REC_TYPE_FAN_SPEED: "%",
     gpu.RecType.REC_TYPE_TEMPERATURE: "°C",
     gpu.RecType.REC_TYPE_MEMORY: "Byte"
