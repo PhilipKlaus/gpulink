@@ -12,4 +12,4 @@ from gpulink.recording.timeseries import TimeSeries
 __all__ = ["DeviceCtx", "DeviceMock", "Plot", "Recorder", "record", "RecType", "TemperatureThreshold",
            "ClockId", "ClockType", "TemperatureSensorType", "LocalNvmlGpu", "Gpu", "GpuSet", "MemInfo", "SimpleResult",
            "TimeSeries", "Recording"]
-__version__ = "0.4.1"
+__version__ = "0.6.0"
