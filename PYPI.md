@@ -1,13 +1,15 @@
 # gpulink
 
+[![Downloads](https://static.pepy.tech/badge/gpulink/week)](https://pepy.tech/project/gpulink)
+![PythonTest](https://github.com/PhilipKlaus/gpulink/actions/workflows/python-test.yml/badge.svg)
+
 A library and command-line tool for monitoring NVIDIA GPU stats.  
 **gpulink** uses [pynvml](https://github.com/gpuopenanalytics/pynvml) - a Python wrapper for
 the [NVIDIA Management Library](https://developer.nvidia.com/nvidia-management-library-nvml) (NVML).
 
 ## Current status
 
-**⚠ This project is in a very early state and under heavy development - breaking changes between versions are possible
-⚠**
+⚠ gpulink is in a very early state - breaking changes between versions are possible!
 
 ## Requirements
 
@@ -54,11 +56,11 @@ Commands:
 
 ## Library usage
 
-**gpulink** can be simply used from within Python. Just import `gpulink` and create a `DeviceCtx`. This context manages
+**gpulink** can be easily used within applications. Just import `gpulink` and create a `DeviceCtx`. This context manages
 device access and provides an API for fetching GPU properties
 (see [API example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_api.py)):
 
-```
+``` python
 import gpulink as gpu
 
 with gpu.DeviceCtx() as ctx:
@@ -71,16 +73,40 @@ with gpu.DeviceCtx() as ctx:
 **gpulink** provides a [Recorder](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/recording/recorder.py) class
 for recording GPU properties. For simple instantiation use one of the provided factory methods, e.g.:
 
+``` python
+recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
 ```
-    recorder = gpu.Recorder.create_memory_recorder(ctx, ctx.gpus.ids)
+
+Afterwards a recording can be performed:
+
+#### Option 1: Using `start` and `stop` method (see [Basic example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_basic.py))
+
+``` python
     recorder.start()
     ... # Do some GPU stuff
     recorder.stop(auto_join=True)
 ```
 
+#### Option 2: Using a context manager (see [Context-Manager example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_context_manager.py))
+
+``` python
+    with recorder:
+    ... # Do some GPU stuff
+```
+
+#### Option 3: Using a decorator (see [Decorator example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_decorator.py))
+
+``` python
+    @record(factory=gpu.Recorder.create_memory_recorder)
+    def my_gpu_function():
+    ... # Do dome GPU stuff
+    
+    my_gpu_function()
+```
+
 Once a recording is finished its data can be accessed:
 
-```
+``` python
 recording = recording = recorder.get_recording()
 ```
 
@@ -89,7 +115,7 @@ recording = recording = recorder.get_recording()
 **gpulink** provides a [Plot](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/plotting/plot.py) class for
 visualizing recordings using [matplotlib](https://matplotlib.org/):
 
-```
+``` python
     from pathlib import Path
     
     # Generate the plot
@@ -105,18 +131,16 @@ visualizing recordings using [matplotlib](https://matplotlib.org/):
     figure, axis = plot.generate_graph()
 ```
 
-The plot can be parametrized using
-the [PlotOptions](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/plotting/plot_options.py) dataclass. An
-example using custom plot options is given
-in [Basic example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_basic.py)
-
 ## Unit testing
 
 When using **gpulink** inside unit tests, create or use an already existing device mock,
-e.g. [DeviceMock](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/tests/device_mock.py). Then during creating
+e.g. [DeviceMock](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/gpulink/devices/device_mock.py).
+To create a custom mock class just derive it from
+the [BaseDevice](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/gpulink/devices/base_device.py). Then during
+creating
 a `DeviceCtx` provide the mock as follows:
 
-```
+``` python
 import gpulink as gpu
 
 with gpu.DeviceCtx(device=DeviceMock) as ctx:
@@ -127,16 +151,24 @@ with gpu.DeviceCtx(device=DeviceMock) as ctx:
 
 - If you get the error message below, please ensure that the NVIDIA Management Library is installed on you system by
   typing `nvidia-smi --version` into a terminal:  
-  ```pynvml.nvml.NVMLError_LibraryNotFound: NVML Shared Library Not Found```.  
+  ```pynvml.nvml.NVMLError_LibraryNotFound: NVML Shared Library Not Found```.
 
 ## Planned features
+
 - Live-plotting of GPU stats
 
-## Changelog 
-- 0.4.0
+## Changelog
+
+- **0.4.0**
     - Recording arbitrary GPU stats (clock, fan-speed, memory, power-usage, temp)
     - Display GPU name and power usage within `sensors` command
     - Replaced `arparse` library by [click](https://click.palletsprojects.com/en/8.1.x/)
-    - Aborting a `watch` or `recording` command can be done by pressing any instead of `ctrl+c`
+    - Aborting a `watch` or `recording` command can be done by pressing any key instead of `ctrl+c`
 - **0.4.1**
-    - Fix error when calling `nvmlDeviceGetName` in `pynvml` version *11.5.0* 
+    - Fix error when calling `nvmlDeviceGetName` in `pynvml` version *11.5.0*
+- **0.5.0**
+    - Add context-manager-based recording
+    - Add decorator-based recording
+- **0.6.0**
+    - Remove PlotOptions class
+    - Fix imports and update unit tests

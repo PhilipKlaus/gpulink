@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 
 from gpulink import DeviceCtx, Plot, Recorder
 from gpulink.cli.console import get_spinner, set_cursor
-from gpulink.consts import MB
+from gpulink.consts import MB, WATTS
 from gpulink.recording.gpu_recording import Recording
 
 
@@ -77,6 +77,10 @@ def _handle_record(rec_options: _RecOptions, factory_method: Callable, gpus: Opt
         # If memory was recorded: convert the output to MB per default
         if factory_method == Recorder.create_memory_recorder:
             recording.convert(MB, "MB")
+
+        # If power-consumption was recorded: convert the output to W per default
+        if factory_method == Recorder.create_power_usage_recorder:
+            recording.convert(WATTS, "W")
 
         click.echo(recording)
 

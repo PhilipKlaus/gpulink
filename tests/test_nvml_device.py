@@ -6,11 +6,7 @@ from collections import namedtuple
 
 import pytest
 
-from gpulink import DeviceCtx
-from gpulink.devices.nvml_defines import TemperatureThreshold, TemperatureSensorType, ClockType, \
-    ClockId
-from gpulink.devices.query import SimpleResult, MemInfo
-from gpulink.devices.gpu import Gpu, GpuSet
+import gpulink as gpu
 
 _GB = int(1e9)
 
@@ -47,67 +43,67 @@ def patch_nvcontext(mocker):
 
 
 def test_gpus():
-    with DeviceCtx() as ctx:
-        assert ctx.gpus == GpuSet([Gpu(0, "GPU_TEST"), Gpu(1, "GPU_TEST")])
+    with gpu.DeviceCtx() as ctx:
+        assert ctx.gpus == gpu.GpuSet([gpu.Gpu(0, "GPU_TEST"), gpu.Gpu(1, "GPU_TEST")])
 
 
 def test_get_memory_info():
-    with DeviceCtx() as ctx:
+    with gpu.DeviceCtx() as ctx:
         assert ctx.get_memory_info() == [
-            MemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=0, timestamp=0, gpu_name="GPU_TEST"),
-            MemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=1, timestamp=0, gpu_name="GPU_TEST")]
+            gpu.MemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=0, timestamp=0, gpu_name="GPU_TEST"),
+            gpu.MemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=1, timestamp=0, gpu_name="GPU_TEST")]
         assert ctx.get_memory_info(gpus=[1]) == [
-            MemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=1, timestamp=0, gpu_name="GPU_TEST")
+            gpu.MemInfo(total=_GB, used=_GB // 2, free=_GB // 2, gpu_idx=1, timestamp=0, gpu_name="GPU_TEST")
         ]
 
 
 def test_get_fan_speed():
-    with DeviceCtx() as ctx:
+    with gpu.DeviceCtx() as ctx:
         assert ctx.get_fan_speed(fan=0) == [
-            SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT // 2),
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT // 2)
+            gpu.SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT // 2),
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT // 2)
         ]
         assert ctx.get_fan_speed(gpus=[1]) == [
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT)
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_FAN_SPEED_PCT)
         ]
 
 
 def test_get_temperature():
-    with DeviceCtx() as ctx:
-        assert ctx.get_temperature(TemperatureSensorType.GPU) == [
-            SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_TMP),
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP)
+    with gpu.DeviceCtx() as ctx:
+        assert ctx.get_temperature(gpu.TemperatureSensorType.GPU) == [
+            gpu.SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_TMP),
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP)
         ]
-        assert ctx.get_temperature(TemperatureSensorType.GPU, gpus=[1]) == [
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP)
+        assert ctx.get_temperature(gpu.TemperatureSensorType.GPU, gpus=[1]) == [
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP)
         ]
 
 
 def test_get_temperature_threshold():
-    with DeviceCtx() as ctx:
-        assert ctx.get_temperature_threshold(TemperatureThreshold.TEMPERATURE_THRESHOLD_GPU_MAX) == [
-            SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2),
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2)
+    with gpu.DeviceCtx() as ctx:
+        assert ctx.get_temperature_threshold(gpu.TemperatureThreshold.TEMPERATURE_THRESHOLD_GPU_MAX) == [
+            gpu.SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2),
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2)
         ]
-        assert ctx.get_temperature_threshold(TemperatureThreshold.TEMPERATURE_THRESHOLD_COUNT, gpus=[1]) == [
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2),
+        assert ctx.get_temperature_threshold(gpu.TemperatureThreshold.TEMPERATURE_THRESHOLD_COUNT, gpus=[1]) == [
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_TMP // 2),
         ]
 
 
 def test_get_clock():
-    with DeviceCtx() as ctx:
-        assert ctx.get_clock(ClockType.CLOCK_SM) == [
-            SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_CLOCK),
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_CLOCK)
+    with gpu.DeviceCtx() as ctx:
+        assert ctx.get_clock(gpu.ClockType.CLOCK_SM) == [
+            gpu.SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_CLOCK),
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_CLOCK)
         ]
-        assert ctx.get_clock(ClockType.CLOCK_SM, clock_id=ClockId.CLOCK_ID_CURRENT, gpus=[1]) == [
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_CLOCK // 2)
+        assert ctx.get_clock(gpu.ClockType.CLOCK_SM, clock_id=gpu.ClockId.CLOCK_ID_CURRENT, gpus=[1]) == [
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_CLOCK // 2)
         ]
 
 
 def test_get_power_usage():
-    with DeviceCtx() as ctx:
+    with gpu.DeviceCtx() as ctx:
         assert ctx.get_power_usage(ctx.gpus.ids) == [
-            SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_POWER_CONSUMPTION),
-            SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_POWER_CONSUMPTION)
+            gpu.SimpleResult(gpu_idx=0, timestamp=0, gpu_name="GPU_TEST", value=_POWER_CONSUMPTION),
+            gpu.SimpleResult(gpu_idx=1, timestamp=0, gpu_name="GPU_TEST", value=_POWER_CONSUMPTION)
         ]
