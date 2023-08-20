@@ -1,26 +1,23 @@
 import numpy as np
 import pytest
 
-from gpulink import DeviceCtx, Plot
+import gpulink as gpu
 from gpulink.consts import SEC
-from gpulink.recording.gpu_recording import Recording, RecType
-from gpulink.recording.timeseries import TimeSeries
-from gpulink.devices.device_mock import DeviceMock
 
 
 @pytest.fixture
 def device_ctx():
-    return DeviceCtx(device=DeviceMock)
+    return gpu.DeviceCtx(device=gpu.DeviceMock)
 
 
 @pytest.fixture
 def time_series():
     return [
-        TimeSeries(
+        gpu.TimeSeries(
             np.array([i for i in range(10)]),
             np.array([i * 2 for i in range(10)])
         ),
-        TimeSeries(
+        gpu.TimeSeries(
             np.array([i for i in range(10)]),
             np.array([i * 4 for i in range(10)])
         )
@@ -29,15 +26,15 @@ def time_series():
 
 def test_generate_graph_with_autoscale(device_ctx, time_series):
     with device_ctx as ctx:
-        recording = Recording(
+        recording = gpu.Recording(
             gpus=ctx.gpus,
             timeseries=time_series,
-            rtype=RecType.REC_TYPE_TEMPERATURE,
+            rtype=gpu.RecType.REC_TYPE_TEMPERATURE,
             name="Test Recording",
             unit="°C"
         )
 
-        plot = Plot(recording)
+        plot = gpu.Plot(recording)
         _, ax = plot.generate_graph()
 
         gpu1 = ax.lines[0]

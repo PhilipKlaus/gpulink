@@ -84,7 +84,7 @@ Sampling rate:  300.000     [Hz]"
 
 ## Library usage
 
-**gpulink** can be simply used from within Python. Just import `gpulink` and create a `DeviceCtx`. This context manages
+**gpulink** can be easily used within applications. Just import `gpulink` and create a `DeviceCtx`. This context manages
 device access and provides an API for fetching GPU properties
 (see [API example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_api.py)):
 
@@ -159,15 +159,13 @@ visualizing recordings using [matplotlib](https://matplotlib.org/):
     figure, axis = plot.generate_graph()
 ```
 
-The plot can be parametrized using
-the [PlotOptions](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/plotting/plot_options.py) dataclass. An
-example using custom plot options is given
-in [Basic example](https://github.com/PhilipKlaus/gpu-link/blob/main/example/example_basic.py)
-
 ## Unit testing
 
 When using **gpulink** inside unit tests, create or use an already existing device mock,
-e.g. [DeviceMock](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/tests/device_mock.py). Then during creating
+e.g. [DeviceMock](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/gpulink/devices/device_mock.py).
+To create a custom mock class just derive it from
+the [BaseDevice](https://github.com/PhilipKlaus/gpu-link/blob/main/gpulink/gpulink/devices/base_device.py). Then during
+creating
 a `DeviceCtx` provide the mock as follows:
 
 ``` python
@@ -193,9 +191,12 @@ with gpu.DeviceCtx(device=DeviceMock) as ctx:
     - Recording arbitrary GPU stats (clock, fan-speed, memory, power-usage, temp)
     - Display GPU name and power usage within `sensors` command
     - Replaced `arparse` library by [click](https://click.palletsprojects.com/en/8.1.x/)
-    - Aborting a `watch` or `recording` command can be done by pressing any instead of `ctrl+c`
+    - Aborting a `watch` or `recording` command can be done by pressing any key instead of `ctrl+c`
 - **0.4.1**
     - Fix error when calling `nvmlDeviceGetName` in `pynvml` version *11.5.0*
 - **0.5.0**
     - Add context-manager-based recording
     - Add decorator-based recording
+- **0.6.0**
+    - Remove PlotOptions class
+    - Fix imports and update unit tests
